@@ -9,7 +9,10 @@ class SBERTClassifier(nn.Module):
         super(SBERTClassifier, self).__init__()
         self.sbert_model = sbert_model
         self.classifier = nn.Sequential(
-            nn.Linear(self.sbert_model.get_sentence_embedding_dimension(), 1),
+            nn.Linear(self.sbert_model.get_sentence_embedding_dimension(), 128),
+            nn.ReLU(),  # Activation function
+            nn.Dropout(0.3),
+            nn.Linear(128, 1),
             nn.Sigmoid()  # Sigmoid to output probabilities between 0 and 1
         )
     
