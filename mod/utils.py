@@ -3,6 +3,30 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+import pickle
+
+def split_data(genes, labels, gene_descriptions, save_dir,
+               test_size=0.1, random_state=42):
+    # Split into train and test sets
+    genes_train, genes_test, labels_train, labels_test = train_test_split(genes, labels, 
+                                                                          test_size=test_size, 
+                                                                          stratify=labels, 
+                                                                          random_state=random_state)
+    desc_train = [gene_descriptions[gene] for gene in genes_train]
+    desc_test = [gene_descriptions[gene] for gene in genes_test]
+
+    # Save the data
+    train_to_save = {'genes':genes_train, 'desc':desc_train, 'labels':labels_train}
+    val_to_save = {'genes':genes_test, 'desc':desc_test, 'labels':labels_test}
+
+    train_dir = save_dir + "/train_data_" + str(random_state) + ".pkl" 
+    val_dir = save_dir + "/test_data_" + str(random_state) + ".pkl"
+    # Save as a pickle file
+    with open(train_dir, "wb") as f:
+        pickle.dump(train_to_save, f)
+    with open(val_dir, "wb") as f:
+        pickle.dump(val_to_save, f)
 
 def load_data(train_dict, test_dict, embed_dict):
     # Get gene names and the corresponding labels

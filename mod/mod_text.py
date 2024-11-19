@@ -68,3 +68,5 @@ def compute_metrics(eval_pred):
     probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)[:, 1].numpy()  # Get probability of the positive class
     auc = roc_auc_score(labels, probs)
     return {"AUC": auc}
+
+
