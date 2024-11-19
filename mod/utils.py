@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 import pickle
+import csv
 
 def split_data(genes, labels, gene_descriptions, save_dir,
                test_size=0.1, random_state=42):
@@ -92,9 +93,9 @@ def LogisticReg_cv(X_train, y_train, folds=5): # default 5-fold
     
     mean_val_auc = np.mean(val_auc_scores)
     std_val_auc = np.std(val_auc_scores)
-    print(f"Validation AUC: Mean = {mean_val_auc:.4f}, Standard Deviation = {std_val_auc:.4f}")
+    print(f"LR Validation AUC: Mean = {mean_val_auc:.4f}, Standard Deviation = {std_val_auc:.4f}")
 
-    return best_model
+    return best_model, mean_val_auc, std_val_auc
 
 
 def RandomForest_cv(X_train, y_train, folds=5): # default 5-fold
@@ -132,6 +133,61 @@ def RandomForest_cv(X_train, y_train, folds=5): # default 5-fold
     
     mean_val_auc = np.mean(val_auc_scores)
     std_val_auc = np.std(val_auc_scores)
-    print(f"Validation AUC: Mean = {mean_val_auc:.4f}, Standard Deviation = {std_val_auc:.4f}")
+    print(f"RF Validation AUC: Mean = {mean_val_auc:.4f}, Standard Deviation = {std_val_auc:.4f}")
 
-    return best_model
+    return best_model, mean_val_auc, std_val_auc
+
+def get_LR_RF_res(train_dict, test_dict, embed_dict):
+    # Load the data
+    X_train, y_train, X_test, y_test = load_data(train_dict, test_dict, embed_dict)
+
+    ### Logistic regression results
+    best_model, LR_mean_val_auc, LR_std_val_auc = LogisticReg_cv(X_train, y_train, folds=5)
+    # Train the best model on the full training data
+    best_model.fit(X_train, y_train)
+    # Evaluate the best model on the test set
+    y_test_pred_proba = best_model.predict_proba(X_test)[:, 1]
+    LR_test_auc = roc_auc_score(y_test, y_test_pred_proba)
+
+    ### Random forest results
+    best_model, RF_mean_val_auc, RF_std_val_auc = RandomForest_cv(X_train, y_train, folds=5)
+    # Train the best model on the full training data
+    best_model.fit(X_train, y_train)
+    # Evaluate the best model on the test set
+    y_test_pred_proba = best_model.predict_proba(X_test)[:, 1]
+    RF_test_auc = roc_auc_score(y_test, y_test_pred_proba)
+
+    return LR_mean_val_auc, LR_test_auc, RF_mean_val_auc, RF_test_auc
+
+def multiple_run(data_dir, save_csv_dir, random_states, embed_dict):
+    LR_val_res = []
+    RF_val_res = []
+    LR_test_res = []
+    RF_test_res = []
+
+    for random_state in random_states:
+        train_dir = data_dir + "/TrainTestData/train_data_" + str(random_state) + ".pkl"
+        test_dir = data_dir + "/TrainTestData/test_data_" + str(random_state) + ".pkl"
+        # prepare the input data
+        with open(train_dir, "rb") as f:
+            train_data = pickle.load(f)
+        with open(test_dir, "rb") as f:
+            test_data = pickle.load(f)
+
+        LR_mean_val_auc, LR_test_auc, RF_mean_val_auc, RF_test_auc = get_LR_RF_res(train_data, 
+                                                                                test_data, 
+                                                                                embed_dict)
+        LR_val_res.append(f"{LR_mean_val_auc:.4f}")
+        RF_val_res.append(f"{RF_mean_val_auc:.4f}")
+        LR_test_res.append(f"{LR_test_auc:.4f}")
+        RF_test_res.append(f"{RF_test_auc:.4f}")
+
+    rows = zip(LR_val_res, RF_val_res, LR_test_res, RF_test_res)
+
+    # Write to a CSV file
+    with open(save_csv_dir, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        # Optional: Write a header row
+        writer.writerow(['LR_val', 'RF_val', 'LR_test', 'RF_test'])
+        # Write the rows
+        writer.writerows(rows)

@@ -69,4 +69,8 @@ def compute_metrics(eval_pred):
     auc = roc_auc_score(labels, probs)
     return {"AUC": auc}
 
-
+def one_fold_training(train_texts, train_labels, val_texts, val_labels, tokenizer,
+                      output_dir):
+    # Create PyTorch datasets
+    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
