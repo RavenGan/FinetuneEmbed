@@ -8,9 +8,9 @@ os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 
 from mod.mod_text import *
 
-data_dir = "./data/long_vs_shortTF"
-save_csv_dir = "./res/2024_1119/LongShortTF/long_vs_shortTF_finetune_auc.csv"
-output_path = "./res/2024_1119/LongShortTF/LongShortTF_model_"
+data_dir = "./data/MethylationState/bivalent_vs_lys4"
+save_csv_dir = "./res/2024_1119/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv"
+output_path = "./res/2024_1119/BivalentLys4/BivalentLys4_model_"
 
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
 n_folds = 5

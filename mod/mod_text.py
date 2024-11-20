@@ -3,6 +3,9 @@ from torch.utils.data import Dataset
 from transformers import Trainer
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold
+import os
+from transformers import AutoTokenizer, TrainingArguments, AutoModelForSequenceClassification, EarlyStoppingCallback
 
 # Define the dataset class
 class TextDataset(Dataset):
@@ -69,8 +72,115 @@ def compute_metrics(eval_pred):
     auc = roc_auc_score(labels, probs)
     return {"AUC": auc}
 
-def one_fold_training(train_texts, train_labels, val_texts, val_labels, tokenizer,
-                      output_dir):
+
+def one_fold_training(train_texts, train_labels, 
+                      val_texts, val_labels, 
+                      tokenizer, output_dir, fold,
+                      model_name):
     # Create PyTorch datasets
     train_dataset = TextDataset(train_texts, train_labels, tokenizer)
     val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+
+    # Define output directory for this fold
+    output_dir_full = output_dir + f"/fold_{fold + 1}"
+    os.makedirs(output_dir_full, exist_ok=True)
+
+    # Training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir_full,
+        evaluation_strategy="epoch",
+        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        load_best_model_at_end=True, # Load the best model at the end of each fold
+        save_total_limit=1, # Keep only the best model checkpoint
+        learning_rate=1e-4, 
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=20,
+        max_grad_norm=1.0,
+        warmup_ratio=0.1,
+        weight_decay=0.01,
+        metric_for_best_model="AUC",
+        greater_is_better=True
+    )
+
+    # Initialize the model and Trainer for this fold
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                               num_labels=2)
+    
+    trainer = CustomTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        eval_metric="AUC",
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+    )
+
+    # Train the model on this fold
+    trainer.train()
+    trainer.save_model(output_dir_full)
+
+    # Evaluate on the validation set and save the best model's AUC
+    val_results = trainer.evaluate()
+    val_auc = val_results["eval_AUC"]
+    print(f"Fold {fold + 1} Validation AUC: {val_auc}")
+
+    return output_dir_full, val_auc
+
+def multi_fold_training(train_texts_all, train_labels_all,
+                        model_name, output_dir, n_splits=5):
+
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=7)
+
+    # Initialize a list to store AUC scores for each fold
+    val_auc_scores = []
+    output_dirs = []  # Track output directories for each fold
+
+    for fold, (train_index, val_index) in enumerate(kf.split(train_texts_all, train_labels_all)):
+        print(f"Fold {fold + 1}/{n_splits}")
+        # Split data into training and validation for this fold
+        train_texts, val_texts = [train_texts_all[i] for i in train_index], [train_texts_all[i] for i in val_index]
+        train_labels, val_labels = [train_labels_all[i] for i in train_index], [train_labels_all[i] for i in val_index]
+
+        output_dir_full, val_auc = one_fold_training(train_texts, train_labels, 
+                                                val_texts, val_labels, 
+                                                tokenizer, output_dir, fold, model_name)
+        output_dirs.append(output_dir_full)
+        val_auc_scores.append(val_auc)
+    
+    return output_dirs, val_auc_scores
+
+def finetune_best_mod(full_train_dataset, best_model, output_dir):
+    # Define training arguments for the final training phase
+    final_training_args = TrainingArguments(
+        output_dir=output_dir,       # Directory to save the final model
+        evaluation_strategy="no",         # No evaluation during training
+        save_strategy="no",            # Save the model at each epoch
+        save_total_limit=1,               # Keep only the last checkpoint to save storage
+        learning_rate=1e-4,
+        per_device_train_batch_size=8,
+        num_train_epochs=5,
+        weight_decay=0.01,
+        logging_steps=10000,              # Minimize logging output
+        report_to="none"                  # Disable logging to external tools
+    )
+    # Initialize the Trainer with the full dataset and final training arguments
+    trainer = Trainer(
+        model=best_model,
+        args=final_training_args,
+        train_dataset=full_train_dataset
+    )
+    # Train the model on the full dataset
+    trainer.train()
+    return trainer
+
+def pred_test(final_trainer, test_dataset):
+    # Predict on the test dataset
+    test_results = final_trainer.predict(test_dataset)
+    test_probs = torch.nn.functional.softmax(torch.tensor(test_results.predictions), dim=1)[:, 1].numpy()
+    test_auc = roc_auc_score(test_results.label_ids, test_probs)
+    print(f"Test AUC: {test_auc}")
+    return test_auc
