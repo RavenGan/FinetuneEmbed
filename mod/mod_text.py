@@ -92,7 +92,7 @@ def one_fold_training(train_texts, train_labels,
         save_strategy="epoch", # Save checkpoints at the end of each epoch
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
-        learning_rate=1e-4, 
+        learning_rate=1e-3, 
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         num_train_epochs=20,
