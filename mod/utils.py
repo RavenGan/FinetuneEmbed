@@ -173,6 +173,7 @@ def RandomForest_cv(X_train, y_train, folds=5): # default 5-fold
 
     return best_model, mean_val_auc, std_val_auc
 
+
 def get_LR_RF_res(train_dict, test_dict, embed_dict):
     # Load the data
     X_train, y_train, X_test, y_test = load_data(train_dict, test_dict, embed_dict)
@@ -225,5 +226,105 @@ def multiple_run(data_dir, save_csv_dir, random_states, embed_dict):
         writer = csv.writer(file)
         # Optional: Write a header row
         writer.writerow(['LR_val', 'RF_val', 'LR_test', 'RF_test'])
+        # Write the rows
+        writer.writerows(rows)
+
+
+def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
+    # Get gene names and the corresponding labels
+    train_genes = train_dict['genes']
+    train_labels = train_dict['labels']
+
+    eval_genes = eval_dict['genes']
+    eval_labels = eval_dict['labels']
+
+    test_genes = test_dict['genes']
+    test_labels = test_dict['labels']
+
+    # Combine the training and validation data
+    train_genes = train_genes + eval_genes
+    train_labels = train_labels + eval_labels
+
+    # Get the intersected genes
+    overlap_train_gene = list(set(train_genes) & set(embed_dict.keys()))
+    overlap_test_gene = list(set(test_genes) & set(embed_dict.keys()))
+
+    train_indices = [train_genes.index(x) for x in overlap_train_gene]
+    overlap_train_labels = [train_labels[i] for i in train_indices]
+
+    test_indices = [test_genes.index(x) for x in overlap_test_gene]
+    overlap_test_labels = [test_labels[i] for i in test_indices]
+
+    X_train = [embed_dict[x] for x in overlap_train_gene if x in embed_dict]
+    X_train = np.array(X_train)
+    y_train = np.array(overlap_train_labels)
+
+    X_test = [embed_dict[x] for x in overlap_test_gene if x in embed_dict]
+    X_test = np.array(X_test)
+    y_test = np.array(overlap_test_labels)
+    return X_train, y_train, X_test, y_test
+
+
+def LogisticReg_TrainTest(X_train, y_train, X_test, y_test):
+    # Initialize the logistic regression model
+    log_reg = LogisticRegression()
+
+    log_reg.fit(X_train, y_train)
+    y_test_pred_proba = log_reg.predict_proba(X_test)[:, 1]
+    test_auc = roc_auc_score(y_test, y_test_pred_proba)
+
+    return test_auc
+
+def RandomForest_TrainTest(X_train, y_train, X_test, y_test):
+    # Initialize the random forest model
+    random_forest = RandomForestClassifier()
+
+    random_forest.fit(X_train, y_train)
+    y_test_pred_proba = random_forest.predict_proba(X_test)[:, 1]
+    test_auc = roc_auc_score(y_test, y_test_pred_proba)
+
+    return test_auc
+
+def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
+    # Load the data
+    X_train, y_train, X_test, y_test = load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict)
+
+    ### Logistic regression results
+    LR_test_auc = LogisticReg_TrainTest(X_train, y_train, X_test, y_test)
+
+    ### Random forest results
+    RF_test_auc = RandomForest_TrainTest(X_train, y_train, X_test, y_test)
+
+
+    return LR_test_auc, RF_test_auc
+
+
+def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict):
+    LR_test_res = []
+    RF_test_res = []
+
+    for random_state in random_states:
+        train_dir = data_dir + "/TrainEvalTestData/train_data_" + str(random_state) + ".pkl"
+        eval_dir = data_dir + "/TrainEvalTestData/eval_data_" + str(random_state) + ".pkl"
+        test_dir = data_dir + "/TrainEvalTestData/test_data_" + str(random_state) + ".pkl"
+        # prepare the input data
+        with open(train_dir, "rb") as f:
+            train_data = pickle.load(f)
+        with open(eval_dir, "rb") as f:
+            eval_data = pickle.load(f)
+        with open(test_dir, "rb") as f:
+            test_data = pickle.load(f)
+
+        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, embed_dict)
+        LR_test_res.append(f"{LR_test_auc:.4f}")
+        RF_test_res.append(f"{RF_test_auc:.4f}")
+
+    rows = zip(LR_test_res, RF_test_res)
+
+    # Write to a CSV file
+    with open(save_csv_dir, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        # Optional: Write a header row
+        writer.writerow(['LR_test', 'RF_test'])
         # Write the rows
         writer.writerows(rows)

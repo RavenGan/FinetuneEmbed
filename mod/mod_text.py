@@ -5,7 +5,8 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 import os
-from transformers import AutoTokenizer, TrainingArguments, AutoModelForSequenceClassification, EarlyStoppingCallback
+from transformers import AutoTokenizer, TrainingArguments, AutoModelForSequenceClassification, EarlyStoppingCallback, AutoConfig
+
 
 # Define the dataset class
 class TextDataset(Dataset):
@@ -88,8 +89,10 @@ def one_fold_training(train_texts, train_labels,
     # Training arguments
     training_args = TrainingArguments(
         output_dir=output_dir_full,
-        evaluation_strategy="epoch",
-        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        evaluation_strategy="steps",
+        eval_steps=50, # Evaluate every 100 steps
+        save_strategy="steps", # Save checkpoints at the end of each epoch
+        save_steps=50, # Save a checkpoint every 75 steps
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
         learning_rate=1e-3, 
@@ -103,9 +106,15 @@ def one_fold_training(train_texts, train_labels,
         greater_is_better=True
     )
 
+    # Adjust the dropout rate for overfitting
+    config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # Modify dropout rates in the configuration
+    config.hidden_dropout_prob = 0.2  # Dropout for fully connected layers
+    config.attention_probs_dropout_prob = 0.2  # Dropout for attention layers
+
     # Initialize the model and Trainer for this fold
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               num_labels=2)
+                                                               config=config)
     
     trainer = CustomTrainer(
         model=model,
@@ -160,9 +169,10 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir):
         evaluation_strategy="no",         # No evaluation during training
         save_strategy="no",            # Save the model at each epoch
         save_total_limit=1,               # Keep only the last checkpoint to save storage
-        learning_rate=1e-4,
+        learning_rate=1e-2,
         per_device_train_batch_size=8,
-        num_train_epochs=5,
+        num_train_epochs=20,
+        max_grad_norm=1.0,
         weight_decay=0.01,
         logging_steps=10000,              # Minimize logging output
         report_to="none"                  # Disable logging to external tools
