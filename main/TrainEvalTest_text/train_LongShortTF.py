@@ -12,8 +12,7 @@ data_dir = "./data/long_vs_shortTF"
 save_csv_dir = "./res/2024_1125/LongShortTF/long_vs_shortTF_finetune_auc.csv"
 output_path = "./res/2024_1125/LongShortTF/LongShortTF_model_"
 
-# model_name = "sentence-transformers/all-MiniLM-L6-v2"
-model_name = "sentence-transformers/all-MiniLM-L12-v1"
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
 val_auc_ls = []
 test_auc_ls = []
