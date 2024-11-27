@@ -167,11 +167,11 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir):
         evaluation_strategy="no",         # No evaluation during training
         save_strategy="no",            # Save the model at each epoch
         save_total_limit=1,               # Keep only the last checkpoint to save storage
-        learning_rate=1e-4,
+        learning_rate=5e-6,
         per_device_train_batch_size=8,
         num_train_epochs=10,
         max_grad_norm=1.0,
-        weight_decay=0.01,
+        weight_decay=0.1,
         logging_steps=10000,              # Minimize logging output
         report_to="none"                  # Disable logging to external tools
     )
@@ -192,3 +192,252 @@ def pred_test(final_trainer, test_dataset):
     test_auc = roc_auc_score(test_results.label_ids, test_probs)
     print(f"Test AUC: {test_auc}")
     return test_auc
+
+
+def one_fold_training_LongShort(train_texts, train_labels, 
+                                val_texts, val_labels, 
+                                tokenizer, output_dir, fold,
+                                model_name):
+    # Create PyTorch datasets
+    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+
+    # Define output directory for this fold
+    output_dir_full = output_dir + f"/fold_{fold + 1}"
+    os.makedirs(output_dir_full, exist_ok=True)
+
+    # Training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir_full,
+        evaluation_strategy="epoch",
+        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        load_best_model_at_end=True, # Load the best model at the end of each fold
+        save_total_limit=1, # Keep only the best model checkpoint
+        learning_rate=1e-5, 
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=30,
+        max_grad_norm=1.0,
+        # warmup_ratio=0.1,
+        weight_decay=0.1,
+        metric_for_best_model="AUC",
+        greater_is_better=True
+    )
+
+    # # Adjust the dropout rate for overfitting
+    # config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # # Modify dropout rates in the configuration
+    # config.hidden_dropout_prob = 0.4  # Dropout for fully connected layers
+    # config.attention_probs_dropout_prob = 0.4  # Dropout for attention layers
+
+    # # Initialize the model and Trainer for this fold
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+    #                                                            config=config)
+    
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                               num_labels=2)
+    
+    trainer = CustomTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        eval_metric="AUC",
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+    )
+
+    # Train the model on this fold
+    trainer.train()
+    trainer.save_model(output_dir_full)
+
+    # Evaluate on the validation set and save the best model's AUC
+    val_results = trainer.evaluate()
+    val_auc = val_results["eval_AUC"]
+    print(f"Fold {fold + 1} Validation AUC: {val_auc}")
+
+    return output_dir_full, val_auc
+
+
+def one_fold_training_Sensitivity(train_texts, train_labels, 
+                                  val_texts, val_labels, 
+                                  tokenizer, output_dir, fold,
+                                  model_name):
+    # Create PyTorch datasets
+    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+
+    # Define output directory for this fold
+    output_dir_full = output_dir + f"/fold_{fold + 1}"
+    os.makedirs(output_dir_full, exist_ok=True)
+
+    # Training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir_full,
+        evaluation_strategy="epoch",
+        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        load_best_model_at_end=True, # Load the best model at the end of each fold
+        save_total_limit=1, # Keep only the best model checkpoint
+        learning_rate=1e-2, 
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=20,
+        max_grad_norm=1.0,
+        warmup_ratio=0.1,
+        weight_decay=0.1,
+        metric_for_best_model="AUC",
+        greater_is_better=True
+    )
+
+    # Adjust the dropout rate for overfitting
+    config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # Modify dropout rates in the configuration
+    config.hidden_dropout_prob = 0  # Dropout for fully connected layers
+    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+
+    # Initialize the model and Trainer for this fold
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                               config=config)
+    
+    trainer = CustomTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        eval_metric="AUC",
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+    )
+
+    # Train the model on this fold
+    trainer.train()
+    trainer.save_model(output_dir_full)
+
+    # Evaluate on the validation set and save the best model's AUC
+    val_results = trainer.evaluate()
+    val_auc = val_results["eval_AUC"]
+    print(f"Fold {fold + 1} Validation AUC: {val_auc}")
+
+    return output_dir_full, val_auc
+
+def one_fold_training_Lys4(train_texts, train_labels, 
+                           val_texts, val_labels, 
+                           tokenizer, output_dir, fold,
+                           model_name):
+    # Create PyTorch datasets
+    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+
+    # Define output directory for this fold
+    output_dir_full = output_dir + f"/fold_{fold + 1}"
+    os.makedirs(output_dir_full, exist_ok=True)
+
+    # Training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir_full,
+        evaluation_strategy="epoch",
+        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        load_best_model_at_end=True, # Load the best model at the end of each fold
+        save_total_limit=1, # Keep only the best model checkpoint
+        learning_rate=1e-2, 
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=20,
+        max_grad_norm=1.0,
+        warmup_ratio=0.1,
+        weight_decay=0.1,
+        metric_for_best_model="AUC",
+        greater_is_better=True
+    )
+
+    # Adjust the dropout rate for overfitting
+    config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # Modify dropout rates in the configuration
+    config.hidden_dropout_prob = 0  # Dropout for fully connected layers
+    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+
+    # Initialize the model and Trainer for this fold
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                               config=config)
+    
+    trainer = CustomTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        eval_metric="AUC",
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+    )
+
+    # Train the model on this fold
+    trainer.train()
+    trainer.save_model(output_dir_full)
+
+    # Evaluate on the validation set and save the best model's AUC
+    val_results = trainer.evaluate()
+    val_auc = val_results["eval_AUC"]
+    print(f"Fold {fold + 1} Validation AUC: {val_auc}")
+
+    return output_dir_full, val_auc
+
+def one_fold_training_NoMethyl(train_texts, train_labels, 
+                               val_texts, val_labels, 
+                               tokenizer, output_dir, fold,
+                               model_name):
+    # Create PyTorch datasets
+    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+
+    # Define output directory for this fold
+    output_dir_full = output_dir + f"/fold_{fold + 1}"
+    os.makedirs(output_dir_full, exist_ok=True)
+
+    # Training arguments
+    training_args = TrainingArguments(
+        output_dir=output_dir_full,
+        evaluation_strategy="epoch",
+        save_strategy="epoch", # Save checkpoints at the end of each epoch
+        load_best_model_at_end=True, # Load the best model at the end of each fold
+        save_total_limit=1, # Keep only the best model checkpoint
+        learning_rate=1e-2, 
+        per_device_train_batch_size=8,
+        per_device_eval_batch_size=8,
+        num_train_epochs=20,
+        max_grad_norm=1.0,
+        warmup_ratio=0.1,
+        weight_decay=0.1,
+        metric_for_best_model="AUC",
+        greater_is_better=True
+    )
+
+    # Adjust the dropout rate for overfitting
+    config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # Modify dropout rates in the configuration
+    config.hidden_dropout_prob = 0 # Dropout for fully connected layers
+    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+
+    # Initialize the model and Trainer for this fold
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+                                                               config=config)
+    
+    trainer = CustomTrainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics,
+        eval_metric="AUC",
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=5)]
+    )
+
+    # Train the model on this fold
+    trainer.train()
+    trainer.save_model(output_dir_full)
+
+    # Evaluate on the validation set and save the best model's AUC
+    val_results = trainer.evaluate()
+    val_auc = val_results["eval_AUC"]
+    print(f"Fold {fold + 1} Validation AUC: {val_auc}")
+
+    return output_dir_full, val_auc

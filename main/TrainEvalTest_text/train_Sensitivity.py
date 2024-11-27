@@ -9,8 +9,8 @@ os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 from mod.mod_text import *
 
 data_dir = "./data/DosageSensitivity"
-save_csv_dir = "./res/2024_1125/Sensitivity/DosageSensitivity_finetune_auc.csv"
-output_path = "./res/2024_1125/Sensitivity/Sensitivity_model_"
+save_csv_dir = "./res/2024_1126/Sensitivity/DosageSensitivity_finetune_auc.csv"
+output_path = "./res/2024_1126/Sensitivity/Sensitivity_model_"
 
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
@@ -42,7 +42,7 @@ for random_state in random_states:
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    mod_dir, val_auc = one_fold_training(train_texts, train_labels, eval_texts, eval_labels, 
+    mod_dir, val_auc = one_fold_training_Sensitivity(train_texts, train_labels, eval_texts, eval_labels, 
                                      tokenizer, output_dir, 0, model_name)
     
     val_auc_scores.append(val_auc)
