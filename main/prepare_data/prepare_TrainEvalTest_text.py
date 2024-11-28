@@ -12,6 +12,9 @@ from mod.utils import *
 with open("./data/gene_text/hs_ncbi_gene_text.json", "r") as file:
     gene_descriptions = json.load(file)
 
+with open(f"./data/embeddings/GPT_3_5_gene_embeddings_fromGenePT.pickle", "rb") as fp:
+    GPT_3_5_gene_embeddings = pickle.load(fp)
+
 random_states = list(range(41, 51)) # set up the random seeds
 eva_size = 0.1 # validation data proportions
 test_size = 0.1 # test data proportions
@@ -34,6 +37,9 @@ short_range_gene_name = [x['symbol'] for x in short_range_query if 'symbol' in x
 
 long_range_tf_gene = list(set(long_range_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
 short_range_tf_gene = list(set(short_range_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
+
+long_range_tf_gene = list(set(long_range_tf_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
+short_range_tf_gene = list(set(short_range_tf_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
 
 genes = long_range_tf_gene + short_range_tf_gene
 # 1 for long-range TF, 0 for short-range TF
@@ -62,6 +68,9 @@ insensitive_gene_name = [x['symbol'] for x in in_sensitive_query if 'symbol' in 
 
 sensitive_gene = list(set(sensitive_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
 insensitive_gene = list(set(insensitive_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
+
+sensitive_gene = list(set(sensitive_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
+insensitive_gene = list(set(insensitive_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
 
 genes = sensitive_gene + insensitive_gene
  # 1 for sensitive, 0 for insensitive
@@ -92,6 +101,9 @@ lysine_gene_name = [x.get('symbol', '') for x in lysine_query if 'symbol' in x]
 bivalent_gene = list(set(bivalent_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
 lysine_gene = list(set(lysine_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
 
+bivalent_gene = list(set(bivalent_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
+lysine_gene = list(set(lysine_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
+
 genes = bivalent_gene + lysine_gene
 # 1 for bivalent_gene, 0 for lysine_gene
 labels = [1] * len(bivalent_gene) + [0] * len(lysine_gene)
@@ -118,6 +130,9 @@ no_methylation_gene_name = [x.get('symbol', '') for x in no_methylation_query if
 
 bivalent_gene = list(set(bivalent_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
 no_methylation_gene = list(set(no_methylation_gene_name) & set(gene_descriptions.keys())) # find the intersected genes
+
+bivalent_gene = list(set(bivalent_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
+no_methylation_gene = list(set(no_methylation_gene) & set(GPT_3_5_gene_embeddings.keys())) # find the intersected genes
 
 genes = bivalent_gene + no_methylation_gene
  # 1 for bivalent_gene, 0 for no_methylation_gene

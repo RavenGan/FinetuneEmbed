@@ -8,7 +8,7 @@ import pickle
 import csv
 
 def TrainEvalTest_split(genes, labels, gene_descriptions, save_dir, 
-                        test_size=0.2, eval_size=0.2, random_state=42):
+                        test_size=0.1, eval_size=0.1, random_state=42):
     # Split into 80% train+val, 20% test
     genes_train_eval, genes_test, labels_train_eval, labels_test = train_test_split(genes, labels, 
                                                                           test_size=test_size, 
