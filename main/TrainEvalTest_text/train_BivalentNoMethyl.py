@@ -12,7 +12,8 @@ data_dir = "./data/MethylationState/bivalent_vs_no_methyl"
 save_csv_dir = "./res/2024_1126/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv"
 output_path = "./res/2024_1126/BivalentNoMethyl/BivalentNoMethyl_model_"
 
-model_name = "sentence-transformers/all-MiniLM-L6-v2"
+# model_name = "sentence-transformers/all-MiniLM-L6-v2"
+model_name = "intfloat/e5-small-v2"
 
 val_auc_ls = []
 test_auc_ls = []

@@ -167,11 +167,11 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir):
         evaluation_strategy="no",         # No evaluation during training
         save_strategy="no",            # Save the model at each epoch
         save_total_limit=1,               # Keep only the last checkpoint to save storage
-        learning_rate=5e-6,
+        learning_rate=1e-6,
         per_device_train_batch_size=8,
-        num_train_epochs=10,
-        max_grad_norm=1.0,
-        weight_decay=0.1,
+        num_train_epochs=20,
+        max_grad_norm=0.7,
+        weight_decay=0.01,
         logging_steps=10000,              # Minimize logging output
         report_to="none"                  # Disable logging to external tools
     )
@@ -213,15 +213,16 @@ def one_fold_training_LongShort(train_texts, train_labels,
         save_strategy="epoch", # Save checkpoints at the end of each epoch
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
-        learning_rate=1e-5, 
+        learning_rate=1e-6, 
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
-        num_train_epochs=30,
-        max_grad_norm=1.0,
+        num_train_epochs=20,
+        max_grad_norm=0.7,
         # warmup_ratio=0.1,
-        weight_decay=0.1,
+        weight_decay=0.01,
         metric_for_best_model="AUC",
-        greater_is_better=True
+        greater_is_better=True,
+        seed=7
     )
 
     # # Adjust the dropout rate for overfitting
@@ -278,26 +279,30 @@ def one_fold_training_Sensitivity(train_texts, train_labels,
         save_strategy="epoch", # Save checkpoints at the end of each epoch
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
-        learning_rate=1e-2, 
+        learning_rate=1e-6, 
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         num_train_epochs=20,
-        max_grad_norm=1.0,
-        warmup_ratio=0.1,
-        weight_decay=0.1,
+        max_grad_norm=0.7,
+        # warmup_ratio=0.1,
+        weight_decay=0.01,
         metric_for_best_model="AUC",
-        greater_is_better=True
+        greater_is_better=True,
+        seed=7
     )
 
-    # Adjust the dropout rate for overfitting
-    config = AutoConfig.from_pretrained(model_name, num_labels=2)
-    # Modify dropout rates in the configuration
-    config.hidden_dropout_prob = 0  # Dropout for fully connected layers
-    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+    # # Adjust the dropout rate for overfitting
+    # config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # # Modify dropout rates in the configuration
+    # config.hidden_dropout_prob = 0  # Dropout for fully connected layers
+    # config.attention_probs_dropout_prob = 0  # Dropout for attention layers
 
-    # Initialize the model and Trainer for this fold
+    # # Initialize the model and Trainer for this fold
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+    #                                                            config=config)
+    
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               config=config)
+                                                               num_labels=2)
     
     trainer = CustomTrainer(
         model=model,
@@ -339,26 +344,30 @@ def one_fold_training_Lys4(train_texts, train_labels,
         save_strategy="epoch", # Save checkpoints at the end of each epoch
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
-        learning_rate=1e-2, 
+        learning_rate=1e-6, 
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         num_train_epochs=20,
-        max_grad_norm=1.0,
-        warmup_ratio=0.1,
-        weight_decay=0.1,
+        max_grad_norm=0.7,
+        # warmup_ratio=0.1,
+        weight_decay=0.01,
         metric_for_best_model="AUC",
-        greater_is_better=True
+        greater_is_better=True,
+        seed=7
     )
 
-    # Adjust the dropout rate for overfitting
-    config = AutoConfig.from_pretrained(model_name, num_labels=2)
-    # Modify dropout rates in the configuration
-    config.hidden_dropout_prob = 0  # Dropout for fully connected layers
-    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+    # # Adjust the dropout rate for overfitting
+    # config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # # Modify dropout rates in the configuration
+    # config.hidden_dropout_prob = 0  # Dropout for fully connected layers
+    # config.attention_probs_dropout_prob = 0  # Dropout for attention layers
 
-    # Initialize the model and Trainer for this fold
+    # # Initialize the model and Trainer for this fold
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+    #                                                            config=config)
+    
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               config=config)
+                                                               num_labels=2)
     
     trainer = CustomTrainer(
         model=model,
@@ -400,26 +409,30 @@ def one_fold_training_NoMethyl(train_texts, train_labels,
         save_strategy="epoch", # Save checkpoints at the end of each epoch
         load_best_model_at_end=True, # Load the best model at the end of each fold
         save_total_limit=1, # Keep only the best model checkpoint
-        learning_rate=1e-2, 
+        learning_rate=1e-6, 
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
         num_train_epochs=20,
-        max_grad_norm=1.0,
-        warmup_ratio=0.1,
-        weight_decay=0.1,
+        max_grad_norm=0.7,
+        # warmup_ratio=0.1,
+        weight_decay=0.01,
         metric_for_best_model="AUC",
-        greater_is_better=True
+        greater_is_better=True,
+        seed=7
     )
 
-    # Adjust the dropout rate for overfitting
-    config = AutoConfig.from_pretrained(model_name, num_labels=2)
-    # Modify dropout rates in the configuration
-    config.hidden_dropout_prob = 0 # Dropout for fully connected layers
-    config.attention_probs_dropout_prob = 0  # Dropout for attention layers
+    # # Adjust the dropout rate for overfitting
+    # config = AutoConfig.from_pretrained(model_name, num_labels=2)
+    # # Modify dropout rates in the configuration
+    # config.hidden_dropout_prob = 0 # Dropout for fully connected layers
+    # config.attention_probs_dropout_prob = 0  # Dropout for attention layers
 
-    # Initialize the model and Trainer for this fold
+    # # Initialize the model and Trainer for this fold
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name, 
+    #                                                            config=config)
+    
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               config=config)
+                                                               num_labels=2)
     
     trainer = CustomTrainer(
         model=model,

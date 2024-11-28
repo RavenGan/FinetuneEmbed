@@ -13,8 +13,8 @@ with open("./data/gene_text/hs_ncbi_gene_text.json", "r") as file:
     gene_descriptions = json.load(file)
 
 random_states = list(range(41, 51)) # set up the random seeds
-eva_size = 0.2 # validation data proportions
-test_size = 0.2 # test data proportions
+eva_size = 0.1 # validation data proportions
+test_size = 0.1 # test data proportions
 
 ### Long- vs short- range TFs----------------------------------------------------------------
 # The input data used here are downloaded from the geneformer paper Hugging Face website 
