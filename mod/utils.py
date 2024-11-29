@@ -4,6 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 import pickle
 import csv
 
@@ -65,7 +66,7 @@ def split_data(genes, labels, gene_descriptions, save_dir,
     with open(val_dir, "wb") as f:
         pickle.dump(val_to_save, f)
 
-def load_data(train_dict, test_dict, embed_dict):
+def load_data(train_dict, test_dict, embed_dict, do_pca=False):
     # Get gene names and the corresponding labels
     train_genes = train_dict['genes']
     train_labels = train_dict['labels']
@@ -90,6 +91,11 @@ def load_data(train_dict, test_dict, embed_dict):
     X_test = [embed_dict[x] for x in overlap_test_gene if x in embed_dict]
     X_test = np.array(X_test)
     y_test = np.array(overlap_test_labels)
+
+    if do_pca:
+        pca = PCA(n_components=20)
+        X_train = pca.fit_transform(X_train)
+        X_test = pca.transform(X_test)
 
     return X_train, y_train, X_test, y_test
 
@@ -230,7 +236,7 @@ def multiple_run(data_dir, save_csv_dir, random_states, embed_dict):
         writer.writerows(rows)
 
 
-def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
+def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca=False):
     # Get gene names and the corresponding labels
     train_genes = train_dict['genes']
     train_labels = train_dict['labels']
@@ -262,6 +268,12 @@ def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
     X_test = [embed_dict[x] for x in overlap_test_gene if x in embed_dict]
     X_test = np.array(X_test)
     y_test = np.array(overlap_test_labels)
+
+    if do_pca:
+        pca = PCA(n_components=20)
+        X_train = pca.fit_transform(X_train)
+        X_test = pca.transform(X_test)
+
     return X_train, y_train, X_test, y_test
 
 
@@ -285,9 +297,9 @@ def RandomForest_TrainTest(X_train, y_train, X_test, y_test):
 
     return test_auc
 
-def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
+def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca):
     # Load the data
-    X_train, y_train, X_test, y_test = load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict)
+    X_train, y_train, X_test, y_test = load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca)
 
     ### Logistic regression results
     LR_test_auc = LogisticReg_TrainTest(X_train, y_train, X_test, y_test)
@@ -299,7 +311,7 @@ def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict):
     return LR_test_auc, RF_test_auc
 
 
-def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict):
+def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict, do_pca):
     LR_test_res = []
     RF_test_res = []
 
@@ -315,7 +327,7 @@ def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict):
         with open(test_dir, "rb") as f:
             test_data = pickle.load(f)
 
-        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, embed_dict)
+        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, embed_dict, do_pca)
         LR_test_res.append(f"{LR_test_auc:.4f}")
         RF_test_res.append(f"{RF_test_auc:.4f}")
 

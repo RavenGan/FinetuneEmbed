@@ -9,8 +9,8 @@ os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 from mod.mod_text import *
 
 data_dir = "./data/DosageSensitivity"
-save_csv_dir = "./res/2024_1126/Sensitivity/DosageSensitivity_finetune_auc.csv"
-output_path = "./res/2024_1126/Sensitivity/Sensitivity_model_"
+save_csv_dir = "./res/2024_1127/Sensitivity/DosageSensitivity_finetune_auc.csv"
+output_path = "./res/2024_1127/Sensitivity/Sensitivity_model_"
 
 # model_name = "sentence-transformers/all-MiniLM-L6-v2"
 model_name = "intfloat/e5-small-v2"

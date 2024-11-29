@@ -9,8 +9,8 @@ os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 from mod.mod_text import *
 
 data_dir = "./data/MethylationState/bivalent_vs_no_methyl"
-save_csv_dir = "./res/2024_1126/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv"
-output_path = "./res/2024_1126/BivalentNoMethyl/BivalentNoMethyl_model_"
+save_csv_dir = "./res/2024_1127/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv"
+output_path = "./res/2024_1127/BivalentNoMethyl/BivalentNoMethyl_model_"
 
 # model_name = "sentence-transformers/all-MiniLM-L6-v2"
 model_name = "intfloat/e5-small-v2"
