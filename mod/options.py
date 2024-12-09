@@ -16,7 +16,7 @@ def init_parser():
     parser.add_argument("--save_strategy", type=str, default="epoch", help="The checkpoint saving strategy used in training.")
     parser.add_argument("--learning_rate", type=float, default=1e-5, help="The learning rate used in training.")
     parser.add_argument("--num_train_epochs", type=int, default=20, help="The number of epoches used in training.")
-    parser.add_argument("--max_grad_norm", type=float, default=1, help="The maximum gradient norm used in training.")
+    parser.add_argument("--max_grad_norm", type=float, default=0.7, help="The maximum gradient norm used in training.")
     parser.add_argument("--warmup_ratio", type=float, default=0.1, help="The warm up ratio used in training.")
     parser.add_argument("--weight_decay", type=float, default=0.2, help="The gradient weight decay used in training.")
 
