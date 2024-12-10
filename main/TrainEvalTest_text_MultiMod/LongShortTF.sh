@@ -39,8 +39,15 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --model_name BAAI/bge-small-en-v1.5
 
 ### MedEmbed-small-v0.1---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/long_vs_shortTF \
+#     --csv_dir ./res/2024_1209/MedEmbed-small-v0.1/LongShortTF/long_vs_shortTF_finetune_auc.csv \
+#     --output_path ./res/2024_1209/MedEmbed-small-v0.1/LongShortTF/LongShortTF_model_ \
+#     --model_name abhinand/MedEmbed-small-v0.1
+
+### gte-small---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/long_vs_shortTF \
-    --csv_dir ./res/2024_1209/MedEmbed-small-v0.1/LongShortTF/long_vs_shortTF_finetune_auc.csv \
-    --output_path ./res/2024_1209/MedEmbed-small-v0.1/LongShortTF/LongShortTF_model_ \
-    --model_name abhinand/MedEmbed-small-v0.1
+    --csv_dir ./res/2024_1209/gte-small/LongShortTF/long_vs_shortTF_finetune_auc.csv \
+    --output_path ./res/2024_1209/gte-small/LongShortTF/LongShortTF_model_ \
+    --model_name thenlper/gte-small

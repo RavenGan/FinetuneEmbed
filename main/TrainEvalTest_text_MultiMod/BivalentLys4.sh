@@ -39,8 +39,15 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --model_name BAAI/bge-small-en-v1.5
 
 ### MedEmbed-small-v0.1---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
+#     --csv_dir ./res/2024_1209/MedEmbed-small-v0.1/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
+#     --output_path ./res/2024_1209/MedEmbed-small-v0.1/BivalentLys4/BivalentLys4_model_ \
+#     --model_name abhinand/MedEmbed-small-v0.1
+
+### gte-small---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
-    --csv_dir ./res/2024_1209/MedEmbed-small-v0.1/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
-    --output_path ./res/2024_1209/MedEmbed-small-v0.1/BivalentLys4/BivalentLys4_model_ \
-    --model_name abhinand/MedEmbed-small-v0.1
+    --csv_dir ./res/2024_1209/gte-small/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
+    --output_path ./res/2024_1209/gte-small/BivalentLys4/BivalentLys4_model_ \
+    --model_name thenlper/gte-small
