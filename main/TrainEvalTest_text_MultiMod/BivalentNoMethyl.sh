@@ -53,8 +53,15 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --model_name thenlper/gte-small
 
 ###e5-small-v2---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/MethylationState/bivalent_vs_no_methyl \
+#     --csv_dir ./res/2024_1209/e5-small-v2/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
+#     --output_path ./res/2024_1209/e5-small-v2/BivalentNoMethyl/BivalentNoMethyl_model_ \
+#     --model_name intfloat/e5-small-v2
+
+###GIST-all-MiniLM-L6-v2---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/MethylationState/bivalent_vs_no_methyl \
-    --csv_dir ./res/2024_1209/e5-small-v2/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
-    --output_path ./res/2024_1209/e5-small-v2/BivalentNoMethyl/BivalentNoMethyl_model_ \
-    --model_name intfloat/e5-small-v2
+    --csv_dir ./res/2024_1209/GIST-all-MiniLM-L6-v2/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
+    --output_path ./res/2024_1209/GIST-all-MiniLM-L6-v2/BivalentNoMethyl/BivalentNoMethyl_model_ \
+    --model_name avsolatorio/GIST-all-MiniLM-L6-v2
