@@ -46,8 +46,15 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --model_name abhinand/MedEmbed-small-v0.1
 
 ### gte-small---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/DosageSensitivity \
+#     --csv_dir ./res/2024_1209/gte-small/Sensitivity/DosageSensitivity_finetune_auc.csv \
+#     --output_path ./res/2024_1209/gte-small/Sensitivity/Sensitivity_model_ \
+#     --model_name thenlper/gte-small
+
+### e5-small-v2---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/DosageSensitivity \
-    --csv_dir ./res/2024_1209/gte-small/Sensitivity/DosageSensitivity_finetune_auc.csv \
-    --output_path ./res/2024_1209/gte-small/Sensitivity/Sensitivity_model_ \
-    --model_name thenlper/gte-small
+    --csv_dir ./res/2024_1209/e5-small-v2/Sensitivity/DosageSensitivity_finetune_auc.csv \
+    --output_path ./res/2024_1209/e5-small-v2/Sensitivity/Sensitivity_model_ \
+    --model_name intfloat/e5-small-v2
