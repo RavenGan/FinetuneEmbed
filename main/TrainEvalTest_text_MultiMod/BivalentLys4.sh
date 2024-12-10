@@ -10,13 +10,6 @@ source activate base
 conda activate Diff.gene
 
 export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed:$PYTHONPATH"
-### GIST-small-Embedding-v0---------------------------------------------------
-# python finetuning.py \
-#     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
-#     --csv_dir ./res/2024_1209/GIST-small-Embedding-v0/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
-#     --output_path ./res/2024_1209/GIST-small-Embedding-v0/BivalentLys4/BivalentLys4_model_ \
-#     --model_name avsolatorio/GIST-small-Embedding-v0
-
 ### NoInstruct-small-Embedding-v0 (not working)---------------------------------------------------
 # python finetuning.py \
 #     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
@@ -24,9 +17,23 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --output_path ./res/2024_1209/NoInstruct-small-Embedding-v0/BivalentLys4/BivalentLys4_model_ \
 #     --model_name avsolatorio/NoInstruct-small-Embedding-v0
 
+### GIST-small-Embedding-v0---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
+#     --csv_dir ./res/2024_1209/GIST-small-Embedding-v0/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
+#     --output_path ./res/2024_1209/GIST-small-Embedding-v0/BivalentLys4/BivalentLys4_model_ \
+#     --model_name avsolatorio/GIST-small-Embedding-v0
+
 ### stella-base-zh-v2---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
+#     --csv_dir ./res/2024_1209/stella-base-zh-v2/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
+#     --output_path ./res/2024_1209/stella-base-zh-v2/BivalentLys4/BivalentLys4_model_ \
+#     --model_name infgrad/stella-base-zh-v2
+
+### bge-small-en-v1.5---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/MethylationState/bivalent_vs_lys4 \
-    --csv_dir ./res/2024_1209/stella-base-zh-v2/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
-    --output_path ./res/2024_1209/stella-base-zh-v2/BivalentLys4/BivalentLys4_model_ \
-    --model_name infgrad/stella-base-zh-v2
+    --csv_dir ./res/2024_1209/bge-small-en-v1.5/BivalentLys4/bivalent_vs_lys4_finetune_auc.csv \
+    --output_path ./res/2024_1209/bge-small-en-v1.5/BivalentLys4/BivalentLys4_model_ \
+    --model_name BAAI/bge-small-en-v1.5
