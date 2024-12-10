@@ -32,8 +32,15 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --model_name infgrad/stella-base-zh-v2
 
 ###bge-small-en-v1.5---------------------------------------------------
+# python finetuning.py \
+#     --data_dir ./data/MethylationState/bivalent_vs_no_methyl \
+#     --csv_dir ./res/2024_1209/bge-small-en-v1.5/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
+#     --output_path ./res/2024_1209/bge-small-en-v1.5/BivalentNoMethyl/BivalentNoMethyl_model_ \
+#     --model_name BAAI/bge-small-en-v1.5
+
+###MedEmbed-small-v0.1---------------------------------------------------
 python finetuning.py \
     --data_dir ./data/MethylationState/bivalent_vs_no_methyl \
-    --csv_dir ./res/2024_1209/bge-small-en-v1.5/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
-    --output_path ./res/2024_1209/bge-small-en-v1.5/BivalentNoMethyl/BivalentNoMethyl_model_ \
-    --model_name BAAI/bge-small-en-v1.5
+    --csv_dir ./res/2024_1209/MedEmbed-small-v0.1/BivalentNoMethyl/bivalent_vs_no_methyl_finetune_auc.csv \
+    --output_path ./res/2024_1209/MedEmbed-small-v0.1/BivalentNoMethyl/BivalentNoMethyl_model_ \
+    --model_name abhinand/MedEmbed-small-v0.1
