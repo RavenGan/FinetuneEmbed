@@ -67,12 +67,38 @@ class CustomTrainer(Trainer):
 
 
 # Define the compute_metrics function for AUC
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)[:, 1].numpy()  # Get probability of the positive class
-    auc = roc_auc_score(labels, probs)
-    return {"AUC": auc}
+# def compute_metrics(eval_pred):
+#     logits, labels = eval_pred
+#     probs = torch.nn.functional.softmax(torch.tensor(logits), dim=1)[:, 1].numpy()  # Get probability of the positive class
+#     auc = roc_auc_score(labels, probs)
+#     return {"AUC": auc}
 
+def compute_metrics(eval_pred):
+    # Unpack logits and labels
+    logits, labels = eval_pred
+
+    # Check if logits is a tuple and handle appropriately
+    if isinstance(logits, tuple):
+        logits = logits[0]  # Extract the actual logits if they're in a tuple
+
+    # Convert logits and labels to tensors if necessary
+    logits = torch.tensor(logits) if not isinstance(logits, torch.Tensor) else logits
+    labels = torch.tensor(labels) if not isinstance(labels, torch.Tensor) else labels
+
+    # Print shapes for debugging
+    print(f"Logits shape: {logits.shape}")
+    print(f"Labels shape: {labels.shape}")
+
+    # Ensure logits and labels dimensions match
+    if logits.shape[0] != labels.shape[0]:
+        raise ValueError(f"Mismatch: {logits.shape[0]} samples in logits, {labels.shape[0]} samples in labels")
+
+    # Calculate probabilities for positive class
+    probs = torch.nn.functional.softmax(logits, dim=1)[:, 1].numpy()
+
+    # Compute AUC
+    auc = roc_auc_score(labels.numpy(), probs)
+    return {"AUC": auc}
 
 def one_fold_training(train_texts, train_labels, 
                       val_texts, val_labels, 
@@ -182,7 +208,31 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir, args):
 def pred_test(final_trainer, test_dataset):
     # Predict on the test dataset
     test_results = final_trainer.predict(test_dataset)
-    test_probs = torch.nn.functional.softmax(torch.tensor(test_results.predictions), dim=1)[:, 1].numpy()
-    test_auc = roc_auc_score(test_results.label_ids, test_probs)
+    logits = test_results.predictions
+    labels = test_results.label_ids
+
+    # test_probs = torch.nn.functional.softmax(torch.tensor(test_results.predictions), dim=1)[:, 1].numpy()
+    # test_auc = roc_auc_score(test_results.label_ids, test_probs)
+
+    # Check if logits is a tuple and handle appropriately
+    if isinstance(logits, tuple):
+        logits = logits[0]  # Extract the actual logits if they're in a tuple
+
+    # Convert logits and labels to tensors if necessary
+    logits = torch.tensor(logits) if not isinstance(logits, torch.Tensor) else logits
+    labels = torch.tensor(labels) if not isinstance(labels, torch.Tensor) else labels
+
+    # Print shapes for debugging
+    print(f"Logits shape: {logits.shape}")
+    print(f"Labels shape: {labels.shape}")
+
+    # Ensure logits and labels dimensions match
+    if logits.shape[0] != labels.shape[0]:
+        raise ValueError(f"Mismatch: {logits.shape[0]} samples in logits, {labels.shape[0]} samples in labels")
+
+    # Calculate probabilities for positive class
+    probs = torch.nn.functional.softmax(logits, dim=1)[:, 1].numpy()
+    # Compute AUC
+    test_auc = roc_auc_score(labels.numpy(), probs)
     print(f"Test AUC: {test_auc}")
     return test_auc

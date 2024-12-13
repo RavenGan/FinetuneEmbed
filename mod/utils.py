@@ -93,7 +93,7 @@ def load_data(train_dict, test_dict, embed_dict, do_pca=False):
     y_test = np.array(overlap_test_labels)
 
     if do_pca:
-        pca = PCA(n_components=20)
+        pca = PCA(n_components=40)
         X_train = pca.fit_transform(X_train)
         X_test = pca.transform(X_test)
 
