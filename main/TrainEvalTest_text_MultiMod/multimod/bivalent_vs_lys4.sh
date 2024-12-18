@@ -10,5 +10,4 @@ source activate base
 conda activate Diff.gene
 
 export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed:$PYTHONPATH"
-# python gene_level_task_GenePT.py
-python gene_level_task_smallmods.py
+python bivalent_vs_lys4.py
