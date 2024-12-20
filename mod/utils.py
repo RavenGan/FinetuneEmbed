@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
@@ -287,6 +287,29 @@ def LogisticReg_TrainTest(X_train, y_train, X_test, y_test):
 
     return test_auc
 
+def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test):
+    # Define the logistic regression model
+    model = LogisticRegression(solver='liblinear')  # use liblinear for small datasets and L1 penalty
+    
+    # Define a range of hyperparameters for tuning
+    param_grid = {'C': [0.01, 0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}
+    
+    # Initialize GridSearchCV with cross-validation (CV) on the training data
+    grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy', verbose=1)
+    
+    # Fit the grid search to the data
+    grid_search.fit(X_train, y_train)
+    # report the best parameters
+    print("Best parameters found: ", grid_search.best_params_)
+
+    # load the best model and evaluate on the test data
+    best_model = grid_search.best_estimator_
+    y_test_pred_proba = best_model.predict_proba(X_test)[:, 1]
+    test_auc = roc_auc_score(y_test, y_test_pred_proba)
+    
+    return test_auc
+
+
 def RandomForest_TrainTest(X_train, y_train, X_test, y_test):
     # Initialize the random forest model
     random_forest = RandomForestClassifier()
@@ -297,21 +320,50 @@ def RandomForest_TrainTest(X_train, y_train, X_test, y_test):
 
     return test_auc
 
-def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca):
+def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test):
+    # Initialize the RandomForestClassifier
+    rf_model = RandomForestClassifier()
+    
+    # Define the hyperparameter grid
+    param_grid = {
+        'n_estimators': [25, 50, 100, 200, 400],        # Number of trees in the forest
+        'max_depth': [None, 10, 20, 30],            # Maximum depth of each tree
+    }
+    # Initialize GridSearchCV
+    grid_search = GridSearchCV(estimator=rf_model, param_grid=param_grid, cv=5, 
+                               scoring='accuracy', verbose=1, 
+                               n_jobs=-1 # Use all available cores
+                               )
+    # Fit the model with the training data
+    grid_search.fit(X_train, y_train)
+    # report the best parameters
+    print("Best hyperparameters found: ", grid_search.best_params_)
+
+    # Get the best model from the grid search
+    best_rf_model = grid_search.best_estimator_
+    y_test_pred_proba = best_rf_model.predict_proba(X_test)[:, 1]
+    test_auc = roc_auc_score(y_test, y_test_pred_proba)
+
+    return test_auc
+
+def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict, 
+                            do_pca, do_cv):
     # Load the data
     X_train, y_train, X_test, y_test = load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca)
 
-    ### Logistic regression results
-    LR_test_auc = LogisticReg_TrainTest(X_train, y_train, X_test, y_test)
-
-    ### Random forest results
-    RF_test_auc = RandomForest_TrainTest(X_train, y_train, X_test, y_test)
+    if do_cv:
+        LR_test_auc = LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test)
+        RF_test_auc = RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test)
+    else:
+        LR_test_auc = LogisticReg_TrainTest(X_train, y_train, X_test, y_test)
+        RF_test_auc = RandomForest_TrainTest(X_train, y_train, X_test, y_test)
 
 
     return LR_test_auc, RF_test_auc
 
 
-def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict, do_pca):
+def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, 
+                           embed_dict, do_pca, do_cv=True):
     LR_test_res = []
     RF_test_res = []
 
@@ -327,7 +379,8 @@ def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, embed_dict, do
         with open(test_dir, "rb") as f:
             test_data = pickle.load(f)
 
-        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, embed_dict, do_pca)
+        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, 
+                                                           embed_dict, do_pca, do_cv)
         LR_test_res.append(f"{LR_test_auc:.4f}")
         RF_test_res.append(f"{RF_test_auc:.4f}")
 
