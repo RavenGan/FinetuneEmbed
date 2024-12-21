@@ -3,7 +3,7 @@
 #$ -m abe
 #$ -q gpu@@li            # Run on the GPU cluster
 #$ -l gpu_card=1     # Run on 1 GPU card
-#$ -N smallmods      # Specify job name
+#$ -N bivalentNomethyl      # Specify job name
 
 module load conda
 source activate base

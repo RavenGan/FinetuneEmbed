@@ -29,11 +29,13 @@ save_mod_names = ['NoInstruct-small-Embedding-v0',
                'e5-small',
                'gte-tiny']
 
+do_cv = True
+
 for i in range(len(model_names)):
      model_name = model_names[i]
      save_mod_name = save_mod_names[i]
      
      ## Bivalent vs. no methyl
      data_dir = "./data/MethylationState/bivalent_vs_no_methyl"
-     save_csv_dir = "./res/2024_1218/" + save_mod_name + "_bivalent_vs_no_methyl_auc.csv"
-     smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name)
+     save_csv_dir = "./res/2024_1221/" + save_mod_name + "_bivalent_vs_no_methyl_auc.csv"
+     smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv)
