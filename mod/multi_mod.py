@@ -114,7 +114,7 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test):
     # Define the hyperparameter grid
     param_grid = {
         'n_estimators': [25, 50, 100, 200, 400],        # Number of trees in the forest
-        'max_depth': [None, 10, 20, 30],            # Maximum depth of each tree
+        'max_depth': [None, 10, 20, 30]            # Maximum depth of each tree
     }
     # Initialize GridSearchCV
     grid_search = GridSearchCV(estimator=rf_model, param_grid=param_grid, cv=5, 

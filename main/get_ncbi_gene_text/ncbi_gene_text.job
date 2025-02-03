@@ -1,0 +1,11 @@
+#!/bin/bash
+#$ -M dgan@nd.edu
+#$ -m abe
+#$ -q gpu@@li            # Run on the GPU cluster
+#$ -l gpu_card=1     # Run on 1 GPU card
+#$ -N fly_text_info       # Specify job name
+
+conda activate Diff.gene
+# python3 hs_ncbi_gene_text.py
+# python3 mm_ncbi_gene_text.py
+python3 fly_ncbi_gene_text.py
