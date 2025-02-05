@@ -45,6 +45,7 @@ res <- data.frame(Method = character(),
                   Task = character(), 
                   mean_diff = numeric(), 
                   pvals = numeric(), stringsAsFactors = FALSE)
+
 for (i in 1:length(models)) {
   model <- models[i]
   for (j in 1:length(tasks)) {
@@ -55,14 +56,15 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    # mean_diff <- round(diff(test_res$estimate), 4) :-((((
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/NoTuning_LR_over_RF.csv")
+write.csv(res, "./res/2025_0205/diff_results/NoTuning_LR_over_RF.csv")
 
 # Tuning, LR vs. RF-------
 path <- "./res/2024_1230/LRRF_CV_num_res/"
@@ -72,6 +74,7 @@ res <- data.frame(Method = character(),
                   Task = character(), 
                   mean_diff = numeric(), 
                   pvals = numeric(), stringsAsFactors = FALSE)
+
 for (i in 1:length(models)) {
   model <- models[i]
   for (j in 1:length(tasks)) {
@@ -82,14 +85,14 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/Tuning_LR_over_RF.csv")
+write.csv(res, "./res/2025_0205/diff_results/Tuning_LR_over_RF.csv")
 
 
 # LR, Tuning vs. NoTuning-------
@@ -110,14 +113,14 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/LR_Tuning_over_NoTuning.csv")
+write.csv(res, "./res/2025_0205/diff_results/LR_Tuning_over_NoTuning.csv")
 
 # RF, Tuning vs. NoTuning-------
 path_1 <- "./res/2024_1230/LRRF_CV_num_res/"
@@ -137,14 +140,14 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/RF_Tuning_over_NoTuning.csv")
+write.csv(res, "./res/2025_0205/diff_results/RF_Tuning_over_NoTuning.csv")
 
 
 # Finetuning vs. LR Tuning-----
@@ -169,14 +172,14 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/Finetuning_over_LRTuning.csv")
+write.csv(res, "./res/2025_0205/diff_results/Finetuning_over_LRTuning.csv")
 
 # Finetuning vs. RF Tuning-----
 path_1 <- "./res/2024_1230/Finetune_num_res/"
@@ -200,11 +203,11 @@ for (i in 1:length(models)) {
     
     test_res <- t.test(vals_1, vals_2)
     
-    mean_diff <- round(diff(test_res$estimate), 4)
+    mean_diff <- round(mean(vals_1) - mean(vals_2), 4)
     p_value <- round(test_res$p.value, 4)
     
     res <- rbind(res, data.frame(Method = model, Task = task, 
                                  mean_diff = mean_diff, pvals = p_value))
   }
 }
-write.csv(res, "./res/2024_1230/diff_results/Finetuning_over_RFTuning.csv")
+write.csv(res, "./res/2025_0205/diff_results/Finetuning_over_RFTuning.csv")
