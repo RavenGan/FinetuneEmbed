@@ -37,5 +37,5 @@ for i in range(len(model_names)):
 
      ## Dosage sensitive vs insensitive TFs
      data_dir = "./data/DosageSensitivity"
-     save_csv_dir = "./res/2024_1221/" + save_mod_name + "_DosageSensitivity_auc.csv"
+     save_csv_dir = "./res/2025_0206/" + save_mod_name + "_DosageSensitivity_auc.csv"
      smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv)

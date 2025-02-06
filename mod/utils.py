@@ -295,7 +295,8 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test):
     param_grid = {'C': [0.01, 0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}
     
     # Initialize GridSearchCV with cross-validation (CV) on the training data
-    grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy', verbose=1)
+    grid_search = GridSearchCV(model, param_grid, cv=5, scoring='roc_auc', # 'accuracy',  
+                               verbose=1)
     
     # Fit the grid search to the data
     grid_search.fit(X_train, y_train)
@@ -331,7 +332,8 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test):
     }
     # Initialize GridSearchCV
     grid_search = GridSearchCV(estimator=rf_model, param_grid=param_grid, cv=5, 
-                               scoring='accuracy', verbose=1, 
+                               scoring='roc_auc', # 'accuracy', 
+                               verbose=1, 
                                n_jobs=-1 # Use all available cores
                                )
     # Fit the model with the training data

@@ -39,6 +39,6 @@ for i in range(len(model_names)):
      # The input data used here are downloaded from Chen et al. (2020) 
      # (link: https://www-nature-com.stanford.idm.oclc.org/articles/s41467-020-16106-x).
      data_dir = "./data/long_vs_shortTF"
-     save_csv_dir = "./res/2024_1221/" + save_mod_name + "_long_vs_shortTF_auc.csv"
+     save_csv_dir = "./res/2025_0206/" + save_mod_name + "_long_vs_shortTF_auc.csv"
 
      smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv)

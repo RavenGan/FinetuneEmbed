@@ -37,5 +37,5 @@ for i in range(len(model_names)):
      
      ## Bivalent vs. no methyl
      data_dir = "./data/MethylationState/bivalent_vs_no_methyl"
-     save_csv_dir = "./res/2024_1221/" + save_mod_name + "_bivalent_vs_no_methyl_auc.csv"
+     save_csv_dir = "./res/2025_0206/" + save_mod_name + "_bivalent_vs_no_methyl_auc.csv"
      smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv)
