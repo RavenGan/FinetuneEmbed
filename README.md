@@ -13,9 +13,9 @@ While foundation transformer-based models developed for gene expression data ana
 * `./mod`: this folder contains necessary functions to perform the analysis.
 
 ## MTEB ranking
-The ranks of the small-LLMs on MTEB can be found in the leader board website [https://huggingface.co/spaces/mteb/leaderboard_legacy](https://huggingface.co/spaces/mteb/leaderboard_legacy). The ranks we provided were extracted on Dec. 09th, 2024. The ranks are always updating on the website. Please note that the website we used has `legacy` in it. The most recent one does not have that.
+The ranks of the small-LLMs on MTEB can be found in the leader board website [https://huggingface.co/spaces/mteb/leaderboard_legacy](https://huggingface.co/spaces/mteb/leaderboard_legacy). The ranks we provided in the paper were extracted on Dec. 09th, 2024. The ranks are always updating on the website. Please note that the website we used has `_legacy` in it. The most recent one does not have that.
 
 ## Citation
 If you find our work helpful, please cite the following paper:
 
-Gan, D., & Li, J. (2025). Small, Open-Source Text-Embedding Models as Substitutes to OpenAI Models for Gene Analysis.
+Gan, D. & Li, J. (2025). Small, Open-Source Text-Embedding Models as Substitutes to OpenAI Models for Gene Analysis.
