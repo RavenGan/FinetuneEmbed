@@ -6,6 +6,4 @@
 #$ -N fly_text_info       # Specify job name
 
 conda activate Diff.gene
-# python3 hs_ncbi_gene_text.py
-# python3 mm_ncbi_gene_text.py
-python3 fly_ncbi_gene_text.py
+python3 hs_ncbi_gene_text.py
