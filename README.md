@@ -18,4 +18,4 @@ The ranks of the small-LLMs on MTEB can be found in the leader board website [ht
 ## Citation
 If you find our work helpful, please cite the following paper:
 
-Gan, D. & Li, J. (2025). Small, Open-Source Text-Embedding Models as Substitutes to OpenAI Models for Gene Analysis. [https://www.biorxiv.org/content/10.1101/2025.02.15.638462v1](bioRxiv)
+Gan, D. & Li, J. (2025). Small, Open-Source Text-Embedding Models as Substitutes to OpenAI Models for Gene Analysis. [bioRxiv](https://www.biorxiv.org/content/10.1101/2025.02.15.638462v1)
