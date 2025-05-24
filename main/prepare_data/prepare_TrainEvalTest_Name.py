@@ -92,6 +92,8 @@ genes = sensitive_gene + insensitive_gene
  # 1 for sensitive, 0 for insensitive
 labels = [1] * len(sensitive_gene) + [0] * len(insensitive_gene)
 save_dir = "./data/DosageSensitivity/TrainEvalTestData_Name"
+# Create the directory if it does not exist
+os.makedirs(save_dir, exist_ok=True)
 
 # Split the data multiple times
 for random_state in random_states:
@@ -122,6 +124,8 @@ genes = bivalent_gene + lysine_gene
 # 1 for bivalent_gene, 0 for lysine_gene
 labels = [1] * len(bivalent_gene) + [0] * len(lysine_gene)
 save_dir = "./data/MethylationState/bivalent_vs_lys4/TrainEvalTestData_Name"
+# Create the directory if it does not exist
+os.makedirs(save_dir, exist_ok=True)
 
 # Split the data multiple times
 for random_state in random_states:
@@ -149,6 +153,8 @@ genes = bivalent_gene + no_methylation_gene
  # 1 for bivalent_gene, 0 for no_methylation_gene
 labels = [1] * len(bivalent_gene) + [0] * len(no_methylation_gene)
 save_dir = "./data/MethylationState/bivalent_vs_no_methyl/TrainEvalTestData_Name"
+# Create the directory if it does not exist
+os.makedirs(save_dir, exist_ok=True)
 
 # Split the data multiple times
 for random_state in random_states:
