@@ -8,14 +8,50 @@ from sklearn.decomposition import PCA
 import pickle
 import csv
 
-def TrainEvalTest_split(genes, labels, gene_descriptions, save_dir, 
-                        test_size=0.1, eval_size=0.1, random_state=42):
-    # Split into 80% train+val, 20% test
+def TrainEvalTest_Name_split(genes, labels, save_dir,
+                            test_size=0.1, eval_size=0.1, random_state=42):
+    # Split into 90% train+val, 10% test
     genes_train_eval, genes_test, labels_train_eval, labels_test = train_test_split(genes, labels, 
                                                                           test_size=test_size, 
                                                                           stratify=labels, 
                                                                           random_state=random_state)
-    # Split the 80% train+val into 60% train, 20% val
+    # Split the 90% train+val into 80% train, 100% val
+    genes_train, genes_eval, labels_train, labels_eval = train_test_split(genes_train_eval, labels_train_eval, 
+                                                                          test_size=eval_size/(1-test_size), 
+                                                                          stratify=labels_train_eval, 
+                                                                          random_state=random_state)
+    
+    name_train = [gene for gene in genes_train]
+    name_eva = [gene for gene in genes_eval]
+    name_test = [gene for gene in genes_test]
+
+    # Save the data
+    train_to_save = {'genes':genes_train, 'desc':name_train, 'labels':labels_train}
+    eval_to_save = {'genes':genes_eval, 'desc':name_eva, 'labels':labels_eval}
+    val_to_save = {'genes':genes_test, 'desc':name_test, 'labels':labels_test}
+
+    train_dir = save_dir + "/train_data_" + str(random_state) + ".pkl" 
+    eval_dir = save_dir + "/eval_data_" + str(random_state) + ".pkl"
+    val_dir = save_dir + "/test_data_" + str(random_state) + ".pkl"
+
+    # Save as a pickle file
+    with open(train_dir, "wb") as f:
+        pickle.dump(train_to_save, f)
+    with open(eval_dir, "wb") as f:
+        pickle.dump(eval_to_save, f)
+    with open(val_dir, "wb") as f:
+        pickle.dump(val_to_save, f)
+
+
+
+def TrainEvalTest_split(genes, labels, gene_descriptions, save_dir, 
+                        test_size=0.1, eval_size=0.1, random_state=42):
+    # Split into 90% train+val, 10% test
+    genes_train_eval, genes_test, labels_train_eval, labels_test = train_test_split(genes, labels, 
+                                                                          test_size=test_size, 
+                                                                          stratify=labels, 
+                                                                          random_state=random_state)
+    # Split the 90% train+val into 80% train, 100% val
     genes_train, genes_eval, labels_train, labels_eval = train_test_split(genes_train_eval, labels_train_eval, 
                                                                           test_size=eval_size/(1-test_size), 
                                                                           stratify=labels_train_eval, 
