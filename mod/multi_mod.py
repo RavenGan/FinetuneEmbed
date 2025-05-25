@@ -27,7 +27,8 @@ def get_NoInstruct_small_Embedding(model, tokenizer, text, mode):
     if isinstance(text, str):
         text = [text]
 
-    inp = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inp = tokenizer(text, return_tensors="pt", padding=True, 
+                    truncation=True, max_length=512)
 
     with torch.no_grad():
         output = model(**inp)
@@ -49,7 +50,8 @@ def get_BioBERT_Embedding(model, tokenizer, text):
     if isinstance(text, str):
         text = [text]
 
-    inp = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    inp = tokenizer(text, return_tensors="pt", padding=True, 
+                    truncation=True, max_length=512)
 
     with torch.no_grad():
         outputs = model(**inp)
@@ -119,7 +121,7 @@ def load_data_smallmod(train_dict, eval_dict, test_dict, model_name, do_pca=Fals
 
 def LogisticReg_TrainTest(X_train, y_train, X_test, y_test, save_path):
     # Initialize the logistic regression model
-    log_reg = LogisticRegression(multi_class='ovr')
+    log_reg = LogisticRegression()
     log_reg.fit(X_train, y_train)
 
     # Get predicted probabilities and classes
@@ -155,6 +157,7 @@ def LogisticReg_TrainTest(X_train, y_train, X_test, y_test, save_path):
             'y_test_proba': y_test_proba,
             'classes': classes
         }
+        save_path = save_path + "/LR_roc_data.pkl"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             pickle.dump(roc_data, f)
@@ -162,12 +165,17 @@ def LogisticReg_TrainTest(X_train, y_train, X_test, y_test, save_path):
     except Exception as e:
         print("Could not save ROC data:", e)
 
-    return {
+    res_dict = {
         "AUC": test_auc,
         "Precision": precision,
         "Recall": recall,
         "F1": f1
     }
+
+    # keep only 3 decimal places
+    res_dict = {k: round(v, 3) for k, v in res_dict.items()}
+
+    return res_dict
 
 def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     # Determine class info
@@ -176,7 +184,7 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     is_multiclass = n_classes > 2
 
     # Define the logistic regression model
-    model = LogisticRegression(solver='liblinear', multi_class='ovr')  # use liblinear for small datasets and L1 penalty
+    model = LogisticRegression(solver='liblinear')  # use liblinear for small datasets and L1 penalty
     # Define a range of hyperparameters for tuning
     param_grid = {'C': [0.01, 0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}
     
@@ -203,8 +211,12 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
 
     # ROC-AUC score and save binarized data for plotting later
     try:
-        y_test_bin = label_binarize(y_test, classes=classes) if is_multiclass else y_test
-        test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro' if is_multiclass else 'binary', multi_class='ovr' if is_multiclass else 'raise')
+        if is_multiclass:
+            y_test_bin = label_binarize(y_test, classes=classes)
+            test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
+        else:
+            y_test_bin = y_test  # keep as is for binary
+            test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
 
         # Save ROC data for future plotting
         roc_data = {
@@ -212,6 +224,7 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
             'y_test_proba': y_test_proba,
             'classes': classes
         }
+        save_path = save_path + "/LR_CV_roc_data.pkl"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             pickle.dump(roc_data, f)
@@ -221,12 +234,17 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
         print("ROC-AUC skipped due to error:", e)
         test_auc = np.nan
     
-    return {
+    res_dict = {
         "AUC": test_auc,
         "Precision": precision,
         "Recall": recall,
         "F1": f1
     }
+
+    # keep only 3 decimal places
+    res_dict = {k: round(v, 3) for k, v in res_dict.items()}
+
+    return res_dict
 
 def RandomForest_TrainTest(X_train, y_train, X_test, y_test, save_path):
     # Initialize the random forest model
@@ -267,6 +285,7 @@ def RandomForest_TrainTest(X_train, y_train, X_test, y_test, save_path):
             'y_test_proba': y_test_proba,
             'classes': classes
         }
+        save_path = save_path + "/RF_roc_data.pkl"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             pickle.dump(roc_data, f)
@@ -274,12 +293,17 @@ def RandomForest_TrainTest(X_train, y_train, X_test, y_test, save_path):
     except Exception as e:
         print("Could not save ROC data:", e)
 
-    return {
+    res_dict = {
         "AUC": test_auc,
         "Precision": precision,
         "Recall": recall,
         "F1": f1
     }
+
+    # keep only 3 decimal places
+    res_dict = {k: round(v, 3) for k, v in res_dict.items()}
+
+    return res_dict
 
 def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     # Initialize the RandomForestClassifier
@@ -338,6 +362,7 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
             'y_test_proba': y_test_proba,
             'classes': classes
         }
+        save_path = save_path + "/RF_CV_roc_data.pkl"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         with open(save_path, "wb") as f:
             pickle.dump(roc_data, f)
@@ -345,16 +370,23 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     except Exception as e:
         print("Could not save ROC data:", e)
 
-    return {
+    res_dict = {
         "AUC": test_auc,
         "Precision": precision,
         "Recall": recall,
         "F1": f1
     }
 
-def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, model_name, do_cv, ROC_save_path):
+    # keep only 3 decimal places
+    res_dict = {k: round(v, 3) for k, v in res_dict.items()}
+
+    return res_dict
+
+def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, model_name, 
+                            do_cv, ROC_save_path, do_pca, n_PCs):
     # Load the data
-    X_train, y_train, X_test, y_test = load_data_smallmod(train_dict, eval_dict, test_dict, model_name)
+    X_train, y_train, X_test, y_test = load_data_smallmod(train_dict, eval_dict, test_dict, model_name,
+                                                          do_pca, n_PCs)
     
     if do_cv:
         LR_test_auc = LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, ROC_save_path)
@@ -366,14 +398,15 @@ def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, model_name, do_cv,
 
     return LR_test_auc, RF_test_auc
 
-def smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv, ROC_save_path):
+def smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, 
+                                    do_cv, ROC_save_path, do_pca=False, n_PCs=384):
     LR_test_res = []
     RF_test_res = []
 
     for random_state in random_states:
-        train_dir = data_dir + "/TrainEvalTestData/train_data_" + str(random_state) + ".pkl"
-        eval_dir = data_dir + "/TrainEvalTestData/eval_data_" + str(random_state) + ".pkl"
-        test_dir = data_dir + "/TrainEvalTestData/test_data_" + str(random_state) + ".pkl"
+        train_dir = data_dir + "/train_data_" + str(random_state) + ".pkl"
+        eval_dir = data_dir + "/eval_data_" + str(random_state) + ".pkl"
+        test_dir = data_dir + "/test_data_" + str(random_state) + ".pkl"
         # prepare the input data
         with open(train_dir, "rb") as f:
             train_data = pickle.load(f)
@@ -381,8 +414,11 @@ def smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model
             eval_data = pickle.load(f)
         with open(test_dir, "rb") as f:
             test_data = pickle.load(f)
+        
+        save_path = ROC_save_path + "random_state_" + str(random_state)
 
-        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, model_name, do_cv, ROC_save_path)
+        LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, model_name, 
+                                                           do_cv, save_path, do_pca, n_PCs)
         LR_test_res.append(LR_test_auc)
         RF_test_res.append(RF_test_auc)
     

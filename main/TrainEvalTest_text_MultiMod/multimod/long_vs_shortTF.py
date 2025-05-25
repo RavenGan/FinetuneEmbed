@@ -7,7 +7,8 @@ from mod.multi_mod import *
 
 random_states = list(range(41, 51)) # set up the random seeds
 
-model_names = ['avsolatorio/NoInstruct-small-Embedding-v0',
+model_names = ["dmis-lab/biobert-base-cased-v1.1",
+               'avsolatorio/NoInstruct-small-Embedding-v0',
                'avsolatorio/GIST-small-Embedding-v0',
                'infgrad/stella-base-en-v2',
                'BAAI/bge-small-en-v1.5',
@@ -18,16 +19,17 @@ model_names = ['avsolatorio/NoInstruct-small-Embedding-v0',
                'intfloat/e5-small',
                'TaylorAI/gte-tiny']
 
-save_mod_names = ['NoInstruct-small-Embedding-v0',
-               'GIST-small-Embedding-v0',
-               'stella-base-en-v2',
-               'bge-small-en-v1.5',
-               'MedEmbed-small-v0.1',
-               'gte-small',
-               'e5-small-v2',
-               'GIST-all-MiniLM-L6-v2',
-               'e5-small',
-               'gte-tiny']
+save_mod_names = ["biobert-base-cased-v1.1",
+                  'NoInstruct-small-Embedding-v0',
+                  'GIST-small-Embedding-v0',
+                  'stella-base-en-v2',
+                  'bge-small-en-v1.5',
+                  'MedEmbed-small-v0.1',
+                  'gte-small',
+                  'e5-small-v2',
+                  'GIST-all-MiniLM-L6-v2',
+                  'e5-small',
+                  'gte-tiny']
 
 do_cv = True
 
