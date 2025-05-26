@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 # sys.path.append('/Users/david/Desktop/FinetuneEmbed')
 sys.path.append('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 
@@ -7,6 +8,19 @@ sys.path.append('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmb
 # os.chdir('/Users/david/Desktop/FinetuneEmbed')
 os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 from mod.multi_mod import *
+
+# Set up argument parser
+parser = argparse.ArgumentParser(description="Embedding evaluation pipeline")
+
+parser.add_argument("--task", type=str, default="long_vs_shortTF", help="Classification task name")
+parser.add_argument("--embedding_data", type=str, default="TrainEvalTestData", help="Directory for embedding data")
+parser.add_argument("--embedding_type", type=str, default="text_embedding", help="Embedding type")
+parser.add_argument("--do_cv", action="store_true", help="Whether to run cross-validation")
+parser.add_argument("--do_pca", action="store_true", help="Whether to apply PCA")
+parser.add_argument("--n_PCs", type=int, default=20, help="Number of principal components")
+parser.add_argument("--save_root", type=str, default="./res/2025_0525", help="Directory to save results")
+
+args = parser.parse_args()
 
 random_states = list(range(41, 51)) # set up the random seeds
 
@@ -34,16 +48,16 @@ save_mod_names = ["biobert-base-cased-v1.1",
                   'e5-small',
                   'gte-tiny']
 
-task = "long_vs_shortTF"  # Specify the task
-embedding_data = "TrainEvalTestData"
+task = args.task
+embedding_data = args.embedding_data
+embedding_type = args.embedding_type
+do_cv = args.do_cv
+do_pca = args.do_pca
+n_PCs = args.n_PCs
+save_root = args.save_root
+
 
 data_dir = f"./data/{task}/{embedding_data}"
-
-embedding_type = "text_embedding"  # Specify the type of embedding
-
-do_cv = False
-do_pca = False
-n_PCs = 20 
 
 if do_cv==True and do_pca==True:
      folder_name = f"PCA_CV_{embedding_type}"
@@ -54,15 +68,11 @@ elif do_cv==False and do_pca==True:
 elif do_cv==False and do_pca==False:
      folder_name = f"NoPCA_NoCV_{embedding_type}"
 
-save_root = "./res/2025_0525"
 
 for i in range(len(model_names)):
      model_name = model_names[i]
      save_mod_name = save_mod_names[i]
 
-     ## Long- vs short- range TFs
-     # The input data used here are downloaded from Chen et al. (2020) 
-     # (link: https://www-nature-com.stanford.idm.oclc.org/articles/s41467-020-16106-x).
      save_csv_dir = f"{save_root}/{folder_name}/" + save_mod_name + f"_{task}_NumRes.csv"
      os.makedirs(os.path.dirname(save_csv_dir), exist_ok=True)
 
