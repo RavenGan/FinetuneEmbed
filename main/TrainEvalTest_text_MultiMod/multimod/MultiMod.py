@@ -62,9 +62,9 @@ data_dir = f"./data/{task}/{embedding_data}"
 if do_cv==True and do_pca==True:
      folder_name = f"PCA_CV_{embedding_type}"
 elif do_cv==True and do_pca==False:
-     folder_name = f"PCA_NoCV_{embedding_type}"
-elif do_cv==False and do_pca==True:
      folder_name = f"NoPCA_CV_{embedding_type}"
+elif do_cv==False and do_pca==True:
+     folder_name = f"PCA_NoCV_{embedding_type}"
 elif do_cv==False and do_pca==False:
      folder_name = f"NoPCA_NoCV_{embedding_type}"
 
