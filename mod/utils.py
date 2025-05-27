@@ -352,8 +352,10 @@ def LogisticReg_TrainTest(X_train, y_train, X_test, y_test, save_path):
     # ROC-AUC
     try:
         if is_multiclass:
-            y_test_bin = label_binarize(y_test, classes=classes)
-            test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
+            test_auc = roc_auc_score(y_test, y_test_proba, average='macro', multi_class='ovr')
+            y_test_bin = label_binarize(y_test, classes=classes)  # For plotting ROC curves
+            # y_test_bin = label_binarize(y_test, classes=classes)
+            # test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
         else:
             y_test_bin = y_test  # keep as is for binary
             test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
@@ -423,8 +425,10 @@ def LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     # ROC-AUC score and save binarized data for plotting later
     try:
         if is_multiclass:
-            y_test_bin = label_binarize(y_test, classes=classes)
-            test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
+            test_auc = roc_auc_score(y_test, y_test_proba, average='macro', multi_class='ovr')
+            y_test_bin = label_binarize(y_test, classes=classes)  # For plotting ROC curves
+            # y_test_bin = label_binarize(y_test, classes=classes)
+            # test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
         else:
             y_test_bin = y_test  # keep as is for binary
             test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
@@ -479,8 +483,10 @@ def RandomForest_TrainTest(X_train, y_train, X_test, y_test, save_path):
     # Compute ROC-AUC and prepare ROC data
     try:
         if is_multiclass:
-            y_test_bin = label_binarize(y_test, classes=classes)
-            test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
+            test_auc = roc_auc_score(y_test, y_test_proba, average='macro', multi_class='ovr')
+            y_test_bin = label_binarize(y_test, classes=classes)  # For plotting ROC curves
+            # y_test_bin = label_binarize(y_test, classes=classes)
+            # test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
         else:
             y_test_bin = y_test  # binary case
             test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
@@ -556,8 +562,10 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     # Compute ROC-AUC and prepare ROC data
     try:
         if is_multiclass:
-            y_test_bin = label_binarize(y_test, classes=classes)
-            test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
+            test_auc = roc_auc_score(y_test, y_test_proba, average='macro', multi_class='ovr')
+            y_test_bin = label_binarize(y_test, classes=classes)  # For plotting ROC curves
+            # y_test_bin = label_binarize(y_test, classes=classes)
+            # test_auc = roc_auc_score(y_test_bin, y_test_proba, average='macro', multi_class='ovr')
         else:
             y_test_bin = y_test
             test_auc = roc_auc_score(y_test, y_test_proba[:, 1])
