@@ -11,7 +11,7 @@ conda activate /afs/crc/user/d/dgan/.conda/envs/Diff.gene
 
 export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed:$PYTHONPATH"
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \
     --do_cv \
@@ -20,7 +20,7 @@ python Gene_level_task_GenePT_1536.py \
     --save_root "./res/2025_0527"
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \
     --do_cv \
@@ -28,7 +28,7 @@ python Gene_level_task_GenePT_1536.py \
     --save_root "./res/2025_0527"
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \
     --do_pca \
@@ -36,7 +36,7 @@ python Gene_level_task_GenePT_1536.py \
     --save_root "./res/2025_0527"
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \
     --n_PCs 20 \
@@ -44,7 +44,7 @@ python Gene_level_task_GenePT_1536.py \
 
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData_Name" \
     --embedding_type "name_embedding" \
     --do_cv \
@@ -54,7 +54,7 @@ python Gene_level_task_GenePT_1536.py \
 
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData_Name" \
     --embedding_type "name_embedding" \
     --do_cv \
@@ -62,7 +62,7 @@ python Gene_level_task_GenePT_1536.py \
     --save_root "./res/2025_0527"
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData_Name" \
     --embedding_type "name_embedding" \
     --do_pca \
@@ -70,7 +70,7 @@ python Gene_level_task_GenePT_1536.py \
     --save_root "./res/2025_0527"
 
 python Gene_level_task_GenePT_1536.py \
-    --task "bivalent_vs_no_methyl" \
+    --task "MethylationState/bivalent_vs_no_methyl" \
     --embedding_data "TrainEvalTestData_Name" \
     --embedding_type "name_embedding" \
     --n_PCs 20 \

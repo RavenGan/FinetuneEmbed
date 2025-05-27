@@ -19,6 +19,57 @@ import pickle
 import csv
 import os
 
+def get_embeddings(model_name, gene_text_dict, model_dim):
+
+    embedding_dict = {}
+    if model_name == "avsolatorio/NoInstruct-small-Embedding-v0":
+        model = AutoModel.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        for gene, text in gene_text_dict.items():
+            # Get the embedding for each gene text
+            if gene not in embedding_dict:
+                if gene == '':
+                    # If the gene text is empty, use a zero vector
+                    embedding_dict[gene] = np.zeros(model_dim)
+                else:
+                    if isinstance(text, str):
+                       text = [text]
+                    embedding = get_NoInstruct_small_Embedding(model, tokenizer, text, mode="sentence")
+                    embedding_dict[gene] = np.array(embedding.flatten())
+
+    elif model_name == "dmis-lab/biobert-base-cased-v1.1":
+        model = AutoModel.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        for gene, text in gene_text_dict.items():
+            # Get the embedding for each gene text
+            if gene not in embedding_dict:
+                if gene == '':
+                    # If the gene text is empty, use a zero vector
+                    embedding_dict[gene] = np.zeros(model_dim)
+                else:
+                    if isinstance(text, str):
+                       text = [text]
+                    embedding = get_BioBERT_Embedding(model, tokenizer, text)
+                    embedding_dict[gene] = np.array(embedding.flatten())
+    else:
+        model = SentenceTransformer(model_name)
+        for gene, text in gene_text_dict.items():
+            # Get the embedding for each gene text
+            if gene not in embedding_dict:
+                if gene == '':
+                    # If the gene text is empty, use a zero vector
+                    embedding_dict[gene] = np.zeros(model_dim)
+                else:
+                    if isinstance(text, str):
+                       text = [text]
+                    embedding = model.encode(text)
+                    embedding_dict[gene] = np.array(embedding.flatten())
+    
+    return embedding_dict
+
+
+
 def get_NoInstruct_small_Embedding(model, tokenizer, text, mode):
     model.eval()
 
