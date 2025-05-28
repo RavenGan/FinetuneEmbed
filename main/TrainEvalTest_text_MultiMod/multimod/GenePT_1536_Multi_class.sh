@@ -1,9 +1,9 @@
 #!/bin/bash
 #$ -M dgan@nd.edu
-#$ -m abe               # Send mail when job begins, ends and aborts
-#$ -q long              # Specify queue
-#$ -pe smp 1            # Specify number of cores to use.
-#$ -N GenePT_Multi_class     # Specify job name
+#$ -m abe
+#$ -q gpu@@li            # Run on the GPU cluster
+#$ -l gpu_card=1     # Run on 1 GPU card
+#$ -N GenePT_Multi      # Specify job name
 
 module load conda
 source activate base

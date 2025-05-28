@@ -19,7 +19,7 @@ parser.add_argument("--embedding_type", type=str, default="text_embedding", help
 parser.add_argument("--do_cv", action="store_true", help="Whether to run cross-validation")
 parser.add_argument("--do_pca", action="store_true", help="Whether to apply PCA")
 parser.add_argument("--n_PCs", type=int, default=20, help="Number of principal components")
-parser.add_argument("--save_root", type=str, default="./res/2025_0526", help="Directory to save results")
+parser.add_argument("--save_root", type=str, default="./res/2025_0527", help="Directory to save results")
 
 args = parser.parse_args()
 
