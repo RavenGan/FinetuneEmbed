@@ -2,9 +2,16 @@ import torch
 from torch.utils.data import Dataset
 from transformers import Trainer
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import (
+    roc_auc_score,
+    precision_recall_fscore_support,
+    roc_curve
+)
 from sklearn.model_selection import StratifiedKFold
+from sklearn.preprocessing import label_binarize
+import numpy as np
 import os
+import pickle
 from transformers import AutoTokenizer, TrainingArguments, AutoModelForSequenceClassification, EarlyStoppingCallback, AutoConfig
 
 
@@ -85,25 +92,31 @@ def compute_metrics(eval_pred):
     logits = torch.tensor(logits) if not isinstance(logits, torch.Tensor) else logits
     labels = torch.tensor(labels) if not isinstance(labels, torch.Tensor) else labels
 
-    # Print shapes for debugging
-    print(f"Logits shape: {logits.shape}")
-    print(f"Labels shape: {labels.shape}")
+    # Convert logits to probabilities
+    probs = torch.nn.functional.softmax(logits, dim=1).numpy()
+    labels_np = labels.numpy()
 
-    # Ensure logits and labels dimensions match
-    if logits.shape[0] != labels.shape[0]:
-        raise ValueError(f"Mismatch: {logits.shape[0]} samples in logits, {labels.shape[0]} samples in labels")
+    # Number of classes
+    num_classes = probs.shape[1]
 
-    # Calculate probabilities for positive class
-    probs = torch.nn.functional.softmax(logits, dim=1)[:, 1].numpy()
+    try:
+        if num_classes == 2:
+            # Binary classification – use probs[:, 1] as positive class probability
+            auc = roc_auc_score(labels_np, probs[:, 1])
+        else:
+            # Multi-class classification – binarize labels for OVR AUC
+            labels_bin = label_binarize(labels_np, classes=np.arange(num_classes))
+            auc = roc_auc_score(labels_bin, probs, average="macro", multi_class="ovr")
+    except Exception as e:
+        print("ROC-AUC could not be computed:", e)
+        auc = np.nan
 
-    # Compute AUC
-    auc = roc_auc_score(labels.numpy(), probs)
     return {"AUC": auc}
 
 def one_fold_training(train_texts, train_labels, 
                       val_texts, val_labels, 
                       tokenizer, output_dir, fold,
-                      model_name, args):
+                      model_name, args, num_classes):
     # Create PyTorch datasets
     train_dataset = TextDataset(train_texts, train_labels, tokenizer)
     val_dataset = TextDataset(val_texts, val_labels, tokenizer)
@@ -132,7 +145,7 @@ def one_fold_training(train_texts, train_labels,
 
     # Initialize the model and Trainer for this fold
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               num_labels=2)
+                                                               num_labels=num_classes)
     
     trainer = CustomTrainer(
         model=model,
@@ -205,34 +218,70 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir, args):
     trainer.train()
     return trainer
 
-def pred_test(final_trainer, test_dataset):
-    # Predict on the test dataset
+
+def pred_test(final_trainer, test_dataset, save_path):
+    # Predict on test dataset
     test_results = final_trainer.predict(test_dataset)
     logits = test_results.predictions
     labels = test_results.label_ids
 
-    # test_probs = torch.nn.functional.softmax(torch.tensor(test_results.predictions), dim=1)[:, 1].numpy()
-    # test_auc = roc_auc_score(test_results.label_ids, test_probs)
-
-    # Check if logits is a tuple and handle appropriately
+    # Extract logits if needed
     if isinstance(logits, tuple):
-        logits = logits[0]  # Extract the actual logits if they're in a tuple
+        logits = logits[0]
 
-    # Convert logits and labels to tensors if necessary
+    # Convert to tensors
     logits = torch.tensor(logits) if not isinstance(logits, torch.Tensor) else logits
     labels = torch.tensor(labels) if not isinstance(labels, torch.Tensor) else labels
 
-    # Print shapes for debugging
+    # Debug: shape
     print(f"Logits shape: {logits.shape}")
     print(f"Labels shape: {labels.shape}")
 
-    # Ensure logits and labels dimensions match
+    # Sanity check
     if logits.shape[0] != labels.shape[0]:
-        raise ValueError(f"Mismatch: {logits.shape[0]} samples in logits, {labels.shape[0]} samples in labels")
+        raise ValueError(f"Mismatch: {logits.shape[0]} logits, {labels.shape[0]} labels")
 
-    # Calculate probabilities for positive class
-    probs = torch.nn.functional.softmax(logits, dim=1)[:, 1].numpy()
-    # Compute AUC
-    test_auc = roc_auc_score(labels.numpy(), probs)
-    print(f"Test AUC: {test_auc}")
-    return test_auc
+    # Convert to probabilities
+    probs = torch.nn.functional.softmax(logits, dim=1).numpy()
+    labels_np = labels.numpy()
+    preds = np.argmax(probs, axis=1)
+
+    # Determine number of classes
+    num_classes = probs.shape[1]
+
+    # Compute metrics
+    try:
+        if num_classes == 2:
+            auc = roc_auc_score(labels_np, probs[:, 1])
+            fpr, tpr, _ = roc_curve(labels_np, probs[:, 1])
+            roc_data = {"fpr": {1: fpr}, "tpr": {1: tpr}, "labels": labels_np}
+        else:
+            labels_bin = label_binarize(labels_np, classes=np.arange(num_classes))
+            auc = roc_auc_score(labels_bin, probs, average="macro", multi_class="ovr")
+
+            fpr, tpr = {}, {}
+            for i in range(num_classes):
+                fpr[i], tpr[i], _ = roc_curve(labels_bin[:, i], probs[:, i])
+            roc_data = {"fpr": fpr, "tpr": tpr, "labels": labels_np}
+
+    except Exception as e:
+        print("ROC-AUC could not be computed:", e)
+        auc = np.nan
+        roc_data = {}
+
+    precision, recall, f1, _ = precision_recall_fscore_support(labels_np, preds, average="macro")
+
+    print(f"Test AUC: {auc:.3f}")
+    print(f"Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
+
+    # Save ROC curve data
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    with open(save_path, "wb") as f:
+        pickle.dump(roc_data, f)
+
+    return {
+        "AUC": round(auc, 3),
+        "Precision": round(precision, 3),
+        "Recall": round(recall, 3),
+        "F1": round(f1, 3)
+    }
