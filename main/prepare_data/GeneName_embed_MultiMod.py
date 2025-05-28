@@ -46,12 +46,12 @@ gene_text_dict = {gene: gene for gene in loaded_list}
 for i in range(len(model_names)):
     print(f"Processing model: {model_names[i]}")
     # Get embeddings
-    test_embedding = get_embeddings(model_name=model_names[i], 
+    embedding = get_embeddings(model_name=model_names[i], 
                                     gene_text_dict=gene_text_dict,
                                     model_dim=model_dim[i])
     
     # Save
     with open(f'./data/embeddings/GeneName_{save_mod_names[i]}_embed.pickle', 'wb') as f:
-        pickle.dump(test_embedding, f)
+        pickle.dump(embedding, f)
 
 

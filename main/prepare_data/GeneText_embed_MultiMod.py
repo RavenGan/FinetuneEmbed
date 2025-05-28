@@ -52,12 +52,12 @@ gene_text_dict = {k: gene_descriptions[k] for k in overlap_genes if k in gene_de
 for i in range(len(model_names)):
     print(f"Processing model: {model_names[i]}")
     # Get embeddings
-    test_embedding = get_embeddings(model_name=model_names[i], 
+    embedding = get_embeddings(model_name=model_names[i], 
                                     gene_text_dict=gene_text_dict,
                                     model_dim=model_dim[i])
     
     # Save
-    with open(f'./data/embeddings/GeneText_{save_mod_names[i]}_embed.pickle', 'wb') as f:
-        pickle.dump(test_embedding, f)
+    with open(f'./data/embeddings/GeneText2_{save_mod_names[i]}_embed.pickle', 'wb') as f:
+        pickle.dump(embedding, f)
 
 
