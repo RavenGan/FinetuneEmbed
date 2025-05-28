@@ -8,7 +8,7 @@ from sklearn.metrics import (
     roc_curve
 )
 from sklearn.model_selection import StratifiedKFold
-from sklearn.preprocessing import label_binarize
+from sklearn.preprocessing import label_binarize, LabelEncoder
 import numpy as np
 import os
 import pickle
@@ -116,10 +116,17 @@ def compute_metrics(eval_pred):
 def one_fold_training(train_texts, train_labels, 
                       val_texts, val_labels, 
                       tokenizer, output_dir, fold,
-                      model_name, args, num_classes):
+                      model_name, args):
+    
+    # Label encoding: convert string labels to integers
+    label_encoder = LabelEncoder()
+    train_labels_encoded = label_encoder.fit_transform(train_labels)
+    val_labels_encoded = label_encoder.transform(val_labels)
+
+    
     # Create PyTorch datasets
-    train_dataset = TextDataset(train_texts, train_labels, tokenizer)
-    val_dataset = TextDataset(val_texts, val_labels, tokenizer)
+    train_dataset = TextDataset(train_texts, train_labels_encoded, tokenizer)
+    val_dataset = TextDataset(val_texts, val_labels_encoded, tokenizer)
 
     # Define output directory for this fold
     output_dir_full = output_dir + f"/fold_{fold + 1}"
@@ -145,7 +152,7 @@ def one_fold_training(train_texts, train_labels,
 
     # Initialize the model and Trainer for this fold
     model = AutoModelForSequenceClassification.from_pretrained(model_name, 
-                                                               num_labels=num_classes)
+                                                               num_labels=args.num_classes)
     
     trainer = CustomTrainer(
         model=model,
@@ -166,7 +173,7 @@ def one_fold_training(train_texts, train_labels,
     val_auc = val_results["eval_AUC"]
     print(f"Fold {fold + 1} Validation AUC: {val_auc}")
 
-    return output_dir_full, val_auc
+    return output_dir_full, val_auc, label_encoder
 
 def multi_fold_training(train_texts_all, train_labels_all,
                         model_name, output_dir, n_splits=5):
@@ -219,7 +226,7 @@ def finetune_best_mod(full_train_dataset, best_model, output_dir, args):
     return trainer
 
 
-def pred_test(final_trainer, test_dataset, save_path):
+def pred_test(final_trainer, test_dataset, save_path, label_encoder=None):
     # Predict on test dataset
     test_results = final_trainer.predict(test_dataset)
     logits = test_results.predictions
@@ -237,19 +244,25 @@ def pred_test(final_trainer, test_dataset, save_path):
     print(f"Logits shape: {logits.shape}")
     print(f"Labels shape: {labels.shape}")
 
-    # Sanity check
-    if logits.shape[0] != labels.shape[0]:
-        raise ValueError(f"Mismatch: {logits.shape[0]} logits, {labels.shape[0]} labels")
-
     # Convert to probabilities
     probs = torch.nn.functional.softmax(logits, dim=1).numpy()
     labels_np = labels.numpy()
     preds = np.argmax(probs, axis=1)
 
+    # Decode string labels if encoder is provided
+    if label_encoder is not None:
+        # Make sure predictions are also interpretable (optional)
+        decoded_preds = label_encoder.inverse_transform(preds)
+        decoded_labels = label_encoder.inverse_transform(labels_np)
+        print(f"Decoded predictions (sample): {decoded_preds[:5]}")
+        print(f"Decoded labels (sample): {decoded_labels[:5]}")
+        
+        # Use label-encoded ints for computing metrics (still needed)
+        labels_np = label_encoder.transform(decoded_labels)
+
     # Determine number of classes
     num_classes = probs.shape[1]
 
-    # Compute metrics
     try:
         if num_classes == 2:
             auc = roc_auc_score(labels_np, probs[:, 1])
@@ -263,7 +276,6 @@ def pred_test(final_trainer, test_dataset, save_path):
             for i in range(num_classes):
                 fpr[i], tpr[i], _ = roc_curve(labels_bin[:, i], probs[:, i])
             roc_data = {"fpr": fpr, "tpr": tpr, "labels": labels_np}
-
     except Exception as e:
         print("ROC-AUC could not be computed:", e)
         auc = np.nan
@@ -275,7 +287,6 @@ def pred_test(final_trainer, test_dataset, save_path):
     print(f"Precision: {precision:.3f}, Recall: {recall:.3f}, F1: {f1:.3f}")
 
     # Save ROC curve data
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
     with open(save_path, "wb") as f:
         pickle.dump(roc_data, f)
 

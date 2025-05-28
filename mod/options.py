@@ -9,7 +9,9 @@ def init_parser():
     parser.add_argument("--csv_dir", type=str, required=True, help="Path to save the output csv files.")
     parser.add_argument("--output_path", type=str, required=True, help="Path to save the output models.")
     parser.add_argument("--model_name", type=str, default="GIST-small-Embedding-v0", help="Name of the chosen model.")
-    parser.add_argument("--random_states", type=list, default=list(range(41, 51)), help="Random indices used to generate data.")
+    parser.add_argument("--random_states", type=int, nargs='+',default=list(range(41, 51)), help="Random indices used to generate data.")
+    parser.add_argument("--num_classes", type=int, default=2, help="Number of classes for classification.")
+    parser.add_argument("--ROC_save_dir", type=str, required=True, help="Directory to save ROC plots.")
 
     # Arguments for fine-tuning
     parser.add_argument("--evaluation_strategy", type=str, default="epoch", help="The evaluation strategy used in training.")

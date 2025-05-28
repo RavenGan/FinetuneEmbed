@@ -1,19 +1,18 @@
 import pickle
 import os
 import csv
+import sys
+import ast
 import numpy as np
+import pandas as pd
 # Specify the working directory
 # os.chdir('/Users/david/Desktop/FinetuneEmbed')
 os.chdir('/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed')
 
+sys.path.append(os.getcwd())
+
 from mod.mod_text import *
 from mod.options import *
-
-### need to specify 
-# data_dir = "./data/long_vs_shortTF"
-# save_csv_dir = "./res/2024_1127/LongShortTF/long_vs_shortTF_finetune_auc.csv"
-# output_path = "./res/2024_1127/LongShortTF/LongShortTF_model_"
-# model_name = "intfloat/e5-small-v2"
 
 def main():
     # Create the parser
@@ -23,19 +22,25 @@ def main():
 
     data_dir = args.data_dir
     save_csv_dir = args.csv_dir
+    os.makedirs(save_csv_dir, exist_ok=True)
+
     output_path = args.output_path
+    # os.makedirs(output_path, exist_ok=True)
+
     model_name = args.model_name
     random_states = args.random_states
 
-    val_auc_ls = []
-    test_auc_ls = []
+    ROC_save_dir = args.ROC_save_dir
+    os.makedirs(ROC_save_dir, exist_ok=True)
+
+    test_res_ls = []
 
     for random_state in random_states:
         output_dir = output_path  + str(random_state)
 
-        train_dir = data_dir + "/TrainEvalTestData/train_data_" + str(random_state) + ".pkl"
-        eva_dir = data_dir + "/TrainEvalTestData/eval_data_" + str(random_state) + ".pkl"
-        test_dir = data_dir + "/TrainEvalTestData/test_data_" + str(random_state) + ".pkl"
+        train_dir = data_dir + "/train_data_" + str(random_state) + ".pkl"
+        eva_dir = data_dir + "/eval_data_" + str(random_state) + ".pkl"
+        test_dir = data_dir + "/test_data_" + str(random_state) + ".pkl"
 
         # prepare the input data
         with open(train_dir, "rb") as f:
@@ -53,7 +58,7 @@ def main():
 
         tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-        mod_dir, val_auc = one_fold_training(train_texts, train_labels, eval_texts, eval_labels, 
+        mod_dir, val_auc, label_encoder = one_fold_training(train_texts, train_labels, eval_texts, eval_labels, 
                                         tokenizer, output_dir, 0, model_name, args)
         
         val_auc_scores.append(val_auc)
@@ -75,20 +80,16 @@ def main():
 
         # Evaluate the best model on the test set
         test_dataset = TextDataset(test_texts, test_labels, tokenizer)
-        test_auc = pred_test(final_trainer, test_dataset)
+        test_res = pred_test(final_trainer, test_dataset, 
+                             os.path.join(ROC_save_dir, f"ROC_curve_{str(random_state)}.pkl"),
+                             label_encoder)
+
+        test_res_ls.append(test_res)
 
         # save the results
-        val_auc_ls.append(f"{val_auc:.4f}")
-        test_auc_ls.append(f"{test_auc:.4f}")
-        rows = zip(val_auc_ls, test_auc_ls)
-        # Write to a CSV file
-        with open(save_csv_dir, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            # Optional: Write a header row
-            writer.writerow(['val_auc', 'test_auc'])
-            # Write the rows
-            writer.writerows(rows)
-
+        test_res_df = pd.DataFrame(test_res_ls)
+        test_res_df.to_csv(os.path.join(save_csv_dir, "long_vs_shortTF_finetune_auc.csv"), 
+                           index=False)
 
 if __name__ == "__main__":
     main()
