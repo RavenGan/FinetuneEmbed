@@ -3,7 +3,7 @@
 #$ -m abe
 #$ -q gpu@@li            # Run on the GPU cluster
 #$ -l gpu_card=1     # Run on 1 GPU card
-#$ -N Text_Multi_Trun     # Specify job name
+#$ -N GenePT_Text_Trun      # Specify job name
 
 module load conda
 source activate base
@@ -11,7 +11,7 @@ conda activate /afs/crc/user/d/dgan/.conda/envs/Diff.gene
 
 export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneEmbed:$PYTHONPATH"
 
-# python MultiMod_Multi_class.py \
+# python Gene_level_task_GenePT_1536.py \
 #     --task "Multi_class" \
 #     --embedding_data "TrainEvalTestData" \
 #     --embedding_type "text_embedding" \
@@ -20,14 +20,14 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 #     --save_root "./res/2025_0529"
 
 
-# python MultiMod_Multi_class.py \
+# python Gene_level_task_GenePT_1536.py \
 #     --task "Multi_class" \
 #     --embedding_data "TrainEvalTestData" \
 #     --embedding_type "text_embedding" \
 #     --n_PCs 20 \
 #     --save_root "./res/2025_0529"
 
-python MultiMod_Multi_class_trunc.py \
+python Gene_level_task_GenePT_1536.py \
     --task "Multi_class" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \
@@ -37,7 +37,7 @@ python MultiMod_Multi_class_trunc.py \
     --save_root "./res/2025_0529"
 
 
-python MultiMod_Multi_class_trunc.py \
+python Gene_level_task_GenePT_1536.py \
     --task "Multi_class" \
     --embedding_data "TrainEvalTestData" \
     --embedding_type "text_embedding" \

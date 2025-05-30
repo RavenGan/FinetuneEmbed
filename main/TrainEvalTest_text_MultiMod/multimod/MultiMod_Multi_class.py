@@ -20,6 +20,7 @@ parser.add_argument("--do_cv", action="store_true", help="Whether to run cross-v
 parser.add_argument("--do_pca", action="store_true", help="Whether to apply PCA")
 parser.add_argument("--n_PCs", type=int, default=20, help="Number of principal components")
 parser.add_argument("--save_root", type=str, default="./res/2025_0528", help="Directory to save results")
+parser.add_argument("--do_truncation", action="store_true", help="Whether to truncate embeddings")
 
 args = parser.parse_args()
 
@@ -56,6 +57,8 @@ do_cv = args.do_cv
 do_pca = args.do_pca
 n_PCs = args.n_PCs
 save_root = args.save_root
+do_truncation = args.do_truncation
+
 
 data_dir = f"./data/{task}/{embedding_data}"
 
@@ -67,6 +70,11 @@ elif do_cv==False and do_pca==True:
      folder_name = f"PCA_NoCV_{embedding_type}"
 elif do_cv==False and do_pca==False:
      folder_name = f"NoPCA_NoCV_{embedding_type}"
+
+if do_truncation:
+     folder_name += "_Truncation"
+else:
+     folder_name += "_NoTruncation"
 
 if embedding_type == "text_embedding":
      prefix = "GeneText"
@@ -87,5 +95,5 @@ for i in range(len(model_names)):
     ROC_save_dir = f"{save_root}/{folder_name}/{task}/" + save_mod_name + "/"
 
     multiple_run_TrainTest(data_dir, save_csv_dir, random_states, 
-                       embedding_dict, ROC_save_dir, do_cv, do_pca, n_PCs)
+                       embedding_dict, ROC_save_dir, do_cv, do_pca, n_PCs, do_truncation=do_truncation)
 

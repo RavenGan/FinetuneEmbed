@@ -280,7 +280,7 @@ def multiple_run(data_dir, save_csv_dir, random_states, embed_dict):
         writer.writerows(rows)
 
 
-def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca, n_PCs):
+def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca, n_PCs, do_truncation):
     # Get gene names and the corresponding labels
     train_genes = train_dict['genes']
     train_labels = train_dict['labels']
@@ -325,6 +325,13 @@ def load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, do_pca, n_
         X_test_pca = pca.transform(X_test_scaled)
 
         return X_train_pca, y_train, X_test_pca, y_test
+    
+    elif do_truncation:
+        # If truncation is needed, truncate the embeddings to 384
+        X_train_truncated = X_train[:, :384]
+        X_test_truncated = X_test[:, :384]
+
+        return X_train_truncated, y_train, X_test_truncated, y_test
     else:
         # If PCA is not needed, return the original data
         return X_train, y_train, X_test, y_test
@@ -602,10 +609,10 @@ def RandomForest_TrainTest_CV(X_train, y_train, X_test, y_test, save_path):
     return res_dict
 
 def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict, 
-                            do_pca, do_cv, ROC_save_path, n_PCs):
+                            do_pca, do_cv, ROC_save_path, n_PCs, do_truncation):
     # Load the data
     X_train, y_train, X_test, y_test = load_data_TrainTest(train_dict, eval_dict, test_dict, embed_dict, 
-                                                           do_pca, n_PCs)
+                                                           do_pca, n_PCs, do_truncation)
 
     if do_cv:
         LR_test_auc = LogisticReg_TrainTest_CV(X_train, y_train, X_test, y_test, ROC_save_path)
@@ -619,7 +626,7 @@ def get_LR_RF_res_TrainTest(train_dict, eval_dict, test_dict, embed_dict,
 
 
 def multiple_run_TrainTest(data_dir, save_csv_dir, random_states, 
-                           embed_dict, ROC_save_path, do_cv=True, do_pca=False, n_PCs=384):
+                           embed_dict, ROC_save_path, do_cv, do_pca, n_PCs, do_truncation):
     LR_test_res = []
     RF_test_res = []
 
@@ -638,7 +645,8 @@ def multiple_run_TrainTest(data_dir, save_csv_dir, random_states,
         save_path = ROC_save_path + "random_state_" + str(random_state)
 
         LR_test_auc, RF_test_auc = get_LR_RF_res_TrainTest(train_data, eval_data, test_data, 
-                                                           embed_dict, do_pca, do_cv, save_path, n_PCs)
+                                                           embed_dict, do_pca, do_cv, save_path, n_PCs,
+                                                           do_truncation)
         LR_test_res.append(LR_test_auc)
         RF_test_res.append(RF_test_auc)
 

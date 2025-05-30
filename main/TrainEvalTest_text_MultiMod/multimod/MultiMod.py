@@ -19,34 +19,43 @@ parser.add_argument("--do_cv", action="store_true", help="Whether to run cross-v
 parser.add_argument("--do_pca", action="store_true", help="Whether to apply PCA")
 parser.add_argument("--n_PCs", type=int, default=20, help="Number of principal components")
 parser.add_argument("--save_root", type=str, default="./res/2025_0525", help="Directory to save results")
+parser.add_argument("--do_truncation", action="store_true", help="Whether to truncate embeddings")
+
 
 args = parser.parse_args()
 
 random_states = list(range(41, 51)) # set up the random seeds
 
+# model_names = ["dmis-lab/biobert-base-cased-v1.1",
+#                'avsolatorio/NoInstruct-small-Embedding-v0',
+#                'avsolatorio/GIST-small-Embedding-v0',
+#                'infgrad/stella-base-en-v2',
+#                'BAAI/bge-small-en-v1.5',
+#                'abhinand/MedEmbed-small-v0.1',
+#                'thenlper/gte-small',
+#                'intfloat/e5-small-v2',
+#                'avsolatorio/GIST-all-MiniLM-L6-v2',
+#                'intfloat/e5-small',
+#                'TaylorAI/gte-tiny']
+
+# save_mod_names = ["biobert-base-cased-v1.1",
+#                   'NoInstruct-small-Embedding-v0',
+#                   'GIST-small-Embedding-v0',
+#                   'stella-base-en-v2',
+#                   'bge-small-en-v1.5',
+#                   'MedEmbed-small-v0.1',
+#                   'gte-small',
+#                   'e5-small-v2',
+#                   'GIST-all-MiniLM-L6-v2',
+#                   'e5-small',
+#                   'gte-tiny']
+
+# models used for truncation
 model_names = ["dmis-lab/biobert-base-cased-v1.1",
-               'avsolatorio/NoInstruct-small-Embedding-v0',
-               'avsolatorio/GIST-small-Embedding-v0',
-               'infgrad/stella-base-en-v2',
-               'BAAI/bge-small-en-v1.5',
-               'abhinand/MedEmbed-small-v0.1',
-               'thenlper/gte-small',
-               'intfloat/e5-small-v2',
-               'avsolatorio/GIST-all-MiniLM-L6-v2',
-               'intfloat/e5-small',
-               'TaylorAI/gte-tiny']
+               'infgrad/stella-base-en-v2']
 
 save_mod_names = ["biobert-base-cased-v1.1",
-                  'NoInstruct-small-Embedding-v0',
-                  'GIST-small-Embedding-v0',
-                  'stella-base-en-v2',
-                  'bge-small-en-v1.5',
-                  'MedEmbed-small-v0.1',
-                  'gte-small',
-                  'e5-small-v2',
-                  'GIST-all-MiniLM-L6-v2',
-                  'e5-small',
-                  'gte-tiny']
+                  'stella-base-en-v2']
 
 task = args.task
 embedding_data = args.embedding_data
@@ -55,6 +64,7 @@ do_cv = args.do_cv
 do_pca = args.do_pca
 n_PCs = args.n_PCs
 save_root = args.save_root
+do_truncation = args.do_truncation
 
 
 data_dir = f"./data/{task}/{embedding_data}"
@@ -68,6 +78,11 @@ elif do_cv==False and do_pca==True:
 elif do_cv==False and do_pca==False:
      folder_name = f"NoPCA_NoCV_{embedding_type}"
 
+if do_truncation:
+     folder_name += "_Truncation"
+else:
+     folder_name += "_NoTruncation"
+
 
 for i in range(len(model_names)):
      model_name = model_names[i]
@@ -79,4 +94,4 @@ for i in range(len(model_names)):
      ROC_save_dir = f"{save_root}/{folder_name}/{task}/" + save_mod_name + "/"
 
      smallmod_multiple_run_TrainTest(data_dir, save_csv_dir, random_states, model_name, do_cv,
-                                     ROC_save_dir, do_pca=do_pca, n_PCs=n_PCs)
+                                     ROC_save_dir, do_pca=do_pca, n_PCs=n_PCs, do_truncation=do_truncation)
