@@ -19,34 +19,36 @@ parser.add_argument("--embedding_type", type=str, default="text_embedding", help
 parser.add_argument("--do_cv", action="store_true", help="Whether to run cross-validation")
 parser.add_argument("--do_pca", action="store_true", help="Whether to apply PCA")
 parser.add_argument("--n_PCs", type=int, default=20, help="Number of principal components")
-parser.add_argument("--save_root", type=str, default="./res/2025_0528", help="Directory to save results")
+parser.add_argument("--save_root", type=str, default="./res/2025_0530", help="Directory to save results")
 parser.add_argument("--do_truncation", action="store_true", help="Whether to truncate embeddings")
+parser.add_argument("--model_name", type=str, required=True, help="Model name for embeddings")
+parser.add_argument("--save_mod_name", type=str, required=True, help="Name to save the model embeddings")
 
 args = parser.parse_args()
 
-model_names = ["dmis-lab/biobert-base-cased-v1.1",
-               'avsolatorio/NoInstruct-small-Embedding-v0',
-               'avsolatorio/GIST-small-Embedding-v0',
-               'infgrad/stella-base-en-v2',
-               'BAAI/bge-small-en-v1.5',
-               'abhinand/MedEmbed-small-v0.1',
-               'thenlper/gte-small',
-               'intfloat/e5-small-v2',
-               'avsolatorio/GIST-all-MiniLM-L6-v2',
-               'intfloat/e5-small',
-               'TaylorAI/gte-tiny']
+# model_names = ["dmis-lab/biobert-base-cased-v1.1",
+#                'avsolatorio/NoInstruct-small-Embedding-v0',
+#                'avsolatorio/GIST-small-Embedding-v0',
+#                'infgrad/stella-base-en-v2',
+#                'BAAI/bge-small-en-v1.5',
+#                'abhinand/MedEmbed-small-v0.1',
+#                'thenlper/gte-small',
+#                'intfloat/e5-small-v2',
+#                'avsolatorio/GIST-all-MiniLM-L6-v2',
+#                'intfloat/e5-small',
+#                'TaylorAI/gte-tiny']
 
-save_mod_names = ["biobert-base-cased-v1.1",
-                  'NoInstruct-small-Embedding-v0',
-                  'GIST-small-Embedding-v0',
-                  'stella-base-en-v2',
-                  'bge-small-en-v1.5',
-                  'MedEmbed-small-v0.1',
-                  'gte-small',
-                  'e5-small-v2',
-                  'GIST-all-MiniLM-L6-v2',
-                  'e5-small',
-                  'gte-tiny']
+# save_mod_names = ["biobert-base-cased-v1.1",
+#                   'NoInstruct-small-Embedding-v0',
+#                   'GIST-small-Embedding-v0',
+#                   'stella-base-en-v2',
+#                   'bge-small-en-v1.5',
+#                   'MedEmbed-small-v0.1',
+#                   'gte-small',
+#                   'e5-small-v2',
+#                   'GIST-all-MiniLM-L6-v2',
+#                   'e5-small',
+#                   'gte-tiny']
 
 random_states = list(range(41, 51)) # set up the random seeds
 
@@ -81,19 +83,18 @@ if embedding_type == "text_embedding":
 elif embedding_type == "name_embedding":
      prefix = "GeneName"
 
-for i in range(len(model_names)):
-    print(f"Processing model: {model_names[i]}")
 
-    model_name = model_names[i]
-    save_mod_name = save_mod_names[i]
 
-    with open(f'./data/embeddings/{prefix}_{save_mod_name}_embed.pickle', "rb") as fp:
-          embedding_dict = pickle.load(fp)
+model_name = args.model_name
+save_mod_name = args.save_mod_name
 
-    save_csv_dir = f"{save_root}/{folder_name}/" + save_mod_name + f"_{task}_NumRes.csv"
-    os.makedirs(os.path.dirname(save_csv_dir), exist_ok=True)
-    ROC_save_dir = f"{save_root}/{folder_name}/{task}/" + save_mod_name + "/"
+with open(f'./data/embeddings/{prefix}_{save_mod_name}_embed.pickle', "rb") as fp:
+     embedding_dict = pickle.load(fp)
 
-    multiple_run_TrainTest(data_dir, save_csv_dir, random_states, 
-                       embedding_dict, ROC_save_dir, do_cv, do_pca, n_PCs, do_truncation=do_truncation)
+save_csv_dir = f"{save_root}/{folder_name}/" + save_mod_name + f"_{task}_NumRes.csv"
+os.makedirs(os.path.dirname(save_csv_dir), exist_ok=True)
+ROC_save_dir = f"{save_root}/{folder_name}/{task}/" + save_mod_name + "/"
+
+multiple_run_TrainTest(data_dir, save_csv_dir, random_states, 
+                    embedding_dict, ROC_save_dir, do_cv, do_pca, n_PCs, do_truncation=do_truncation)
 
