@@ -88,7 +88,7 @@ def main():
 
         # save the results
         test_res_df = pd.DataFrame(test_res_ls)
-        test_res_df.to_csv(os.path.join(save_csv_dir, "long_vs_shortTF_finetune_auc.csv"), 
+        test_res_df.to_csv(os.path.join(save_csv_dir, "finetune_auc.csv"), 
                            index=False)
 
 if __name__ == "__main__":
