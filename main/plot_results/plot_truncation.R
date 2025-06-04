@@ -1,0 +1,65 @@
+rm(list = ls())
+set.seed(7)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+tasks <- c("long_vs_shortTF", "DosageSensitivity", "MethylationState/bivalent_vs_lys4",
+           "MethylationState/bivalent_vs_no_methyl", "Multi_class")
+renamed_tasks <- c("Task 1", "Task 2", "Task 3",
+                   "Task 4", "Task 5")
+
+tab <- read.csv("./res/2025_0603_All_Num_Res/NoPCA_CV_name_embedding_Truncation.csv")
+
+for (i in 1:length(tasks)) {
+  task_name <- tasks[i]
+  tab$task[tab$task == task_name] <- renamed_tasks[i]
+}
+
+tab$LLM[tab$LLM == "GenePT_1536"] <- "OpenAI"
+
+model <- "RF"
+chosen_tasks <- c("Task 1", "Task 2", "Task 3",
+                  "Task 4")
+LLM_levels <- c("OpenAI",
+                "stella-base-en-v2",
+                "biobert-base-cased-v1.1")
+
+
+tab_sub <- tab[tab$model == model, ]
+tab_sub <- tab_sub[tab_sub$task %in% chosen_tasks, ]
+
+
+df_long <- tab_sub %>%
+  pivot_longer(
+    cols = c(AUC_mean, AUC_sd, Precision_mean, Precision_sd, 
+             Recall_mean, Recall_sd, F1_mean, F1_sd),
+    names_to = c("Metric", "Type"),
+    names_sep = "_",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Type,
+    values_from = Value
+  )
+
+df_long$LLM <- factor(df_long$LLM, levels = LLM_levels)
+df_long$LLM <- factor(df_long$LLM, levels = rev(levels(df_long$LLM)))
+
+pdf("./res/2025_0603_Plots/Fig8_RF_name_CV.pdf", width = 8, height = 4)
+ggplot(df_long, aes(x = mean, y = LLM, color = Metric)) +
+  geom_point(size = 2, position = position_dodge(width = 0.7)) +
+  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+                 height = 0.2, position = position_dodge(width = 0.7)) +
+  facet_wrap(~ task, scales = "free_x", ncol = 2) +
+  theme_minimal(base_size = 12) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(x = "", y = NULL,
+       title = "",
+       color = "Metrics") +
+  theme(strip.text = element_text(face = "bold", size = 13),
+        axis.text.y = element_text(size = 10),
+        legend.position = "bottom")
+dev.off()
+
