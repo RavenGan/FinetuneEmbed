@@ -12,6 +12,9 @@ renamed_tasks <- c("Task 1", "Task 2", "Task 3",
 
 tab <- read.csv("./res/2025_0603_All_Num_Res/NoPCA_CV_name_embedding_Truncation.csv")
 
+do_CV <- "CV"
+type <- "name"
+
 for (i in 1:length(tasks)) {
   task_name <- tasks[i]
   tab$task[tab$task == task_name] <- renamed_tasks[i]
@@ -19,7 +22,6 @@ for (i in 1:length(tasks)) {
 
 tab$LLM[tab$LLM == "GenePT_1536"] <- "OpenAI"
 
-model <- "RF"
 chosen_tasks <- c("Task 1", "Task 2", "Task 3",
                   "Task 4")
 LLM_levels <- c("OpenAI",
@@ -27,14 +29,24 @@ LLM_levels <- c("OpenAI",
                 "biobert-base-cased-v1.1")
 
 
-tab_sub <- tab[tab$model == model, ]
+tab_sub <- tab
 tab_sub <- tab_sub[tab_sub$task %in% chosen_tasks, ]
 
+colors <- c("#1B9E77", # AUC
+            "#D95F02", # Precision
+            "#7570B3", # Recall
+            "#E6AB02"  # F1
+)
 
+##### Plot results for AUC-------
 df_long <- tab_sub %>%
   pivot_longer(
-    cols = c(AUC_mean, AUC_sd, Precision_mean, Precision_sd, 
-             Recall_mean, Recall_sd, F1_mean, F1_sd),
+    cols = c(AUC_mean, AUC_sd
+             # AUC_mean, AUC_sd
+             # Precision_mean, Precision_sd
+             # Recall_mean, Recall_sd
+             # F1_mean, F1_sd
+    ),
     names_to = c("Metric", "Type"),
     names_sep = "_",
     values_to = "Value"
@@ -47,19 +59,185 @@ df_long <- tab_sub %>%
 df_long$LLM <- factor(df_long$LLM, levels = LLM_levels)
 df_long$LLM <- factor(df_long$LLM, levels = rev(levels(df_long$LLM)))
 
-pdf("./res/2025_0603_Plots/Fig8_RF_name_CV.pdf", width = 8, height = 4)
-ggplot(df_long, aes(x = mean, y = LLM, color = Metric)) +
-  geom_point(size = 2, position = position_dodge(width = 0.7)) +
+df_ranked <- df_long %>%
+  group_by(model, task) %>%
+  mutate(rank = rank(-mean, ties.method = "average")) %>%
+  ungroup()
+
+# df_ranked <- df_ranked %>%
+#   mutate(model = recode(model,
+#                         "LR" = "Logistic regression",
+#                         "RF" = "Random forest"))
+
+pdf(paste0("./res/2025_0605_Plots/AUC/Fig8_AUC_", do_CV, "_", type, ".pdf"), width = 15, height = 3)
+ggplot(df_ranked, aes(x = mean, y = LLM)) +
+  geom_point(size = 2, color = "#1B9E77") +
   geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
-                 height = 0.2, position = position_dodge(width = 0.7)) +
-  facet_wrap(~ task, scales = "free_x", ncol = 2) +
+                 height = 0.2, color = "#1B9E77") +
+  geom_text(aes(label = paste0(rank)),
+            hjust = -0.4, vjust = -0.4, color = "#1B9E77") +
+  facet_grid(rows = vars(model), cols = vars(task), scales = "free_x") +
   theme_minimal(base_size = 12) +
-  scale_color_brewer(palette = "Dark2") +
-  labs(x = "", y = NULL,
-       title = "",
-       color = "Metrics") +
-  theme(strip.text = element_text(face = "bold", size = 13),
-        axis.text.y = element_text(size = 10),
-        legend.position = "bottom")
+  labs(x = "", y = NULL) +
+  theme(
+    strip.placement.y = "left",                      # Move row labels to the left
+    strip.text.y.left = element_text(size = 10, face = "bold", angle = 0),  # Format row labels
+    strip.text = element_text(face = "bold", size = 13),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    legend.position = "none"
+  )
 dev.off()
 
+##### Plot results for Precision-------
+df_long <- tab_sub %>%
+  pivot_longer(
+    cols = c(Precision_mean, Precision_sd
+             # AUC_mean, AUC_sd
+             # Precision_mean, Precision_sd
+             # Recall_mean, Recall_sd
+             # F1_mean, F1_sd
+    ),
+    names_to = c("Metric", "Type"),
+    names_sep = "_",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Type,
+    values_from = Value
+  )
+
+df_long$LLM <- factor(df_long$LLM, levels = LLM_levels)
+df_long$LLM <- factor(df_long$LLM, levels = rev(levels(df_long$LLM)))
+
+df_ranked <- df_long %>%
+  group_by(model, task) %>%
+  mutate(rank = rank(-mean, ties.method = "average")) %>%
+  ungroup()
+
+# df_ranked <- df_ranked %>%
+#   mutate(model = recode(model,
+#                         "LR" = "Logistic regression",
+#                         "RF" = "Random forest"))
+
+pdf(paste0("./res/2025_0605_Plots/Precision/Fig8_Precision_", do_CV, "_", type, ".pdf"), width = 15, height = 3)
+ggplot(df_ranked, aes(x = mean, y = LLM)) +
+  geom_point(size = 2, color = "#D95F02") +
+  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+                 height = 0.2, color = "#D95F02") +
+  geom_text(aes(label = paste0(rank)),
+            hjust = -0.4, vjust = -0.4, color = "#D95F02") +
+  facet_grid(rows = vars(model), cols = vars(task), scales = "free_x") +
+  theme_minimal(base_size = 12) +
+  labs(x = "", y = NULL) +
+  theme(
+    strip.placement.y = "left",                      # Move row labels to the left
+    strip.text.y.left = element_text(size = 10, face = "bold", angle = 0),  # Format row labels
+    strip.text = element_text(face = "bold", size = 13),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    legend.position = "none"
+  )
+dev.off()
+
+##### Plot results for Recall-------
+df_long <- tab_sub %>%
+  pivot_longer(
+    cols = c(Recall_mean, Recall_sd
+             # AUC_mean, AUC_sd
+             # Precision_mean, Precision_sd
+             # Recall_mean, Recall_sd
+             # F1_mean, F1_sd
+    ),
+    names_to = c("Metric", "Type"),
+    names_sep = "_",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Type,
+    values_from = Value
+  )
+
+df_long$LLM <- factor(df_long$LLM, levels = LLM_levels)
+df_long$LLM <- factor(df_long$LLM, levels = rev(levels(df_long$LLM)))
+
+df_ranked <- df_long %>%
+  group_by(model, task) %>%
+  mutate(rank = rank(-mean, ties.method = "average")) %>%
+  ungroup()
+
+# df_ranked <- df_ranked %>%
+#   mutate(model = recode(model,
+#                         "LR" = "Logistic regression",
+#                         "RF" = "Random forest"))
+
+pdf(paste0("./res/2025_0605_Plots/Recall/Fig8_Recall_", do_CV, "_", type, ".pdf"), width = 15, height = 3)
+ggplot(df_ranked, aes(x = mean, y = LLM)) +
+  geom_point(size = 2, color = "#7570B3") +
+  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+                 height = 0.2, color = "#7570B3") +
+  geom_text(aes(label = paste0(rank)),
+            hjust = -0.4, vjust = -0.4, color = "#7570B3") +
+  facet_grid(rows = vars(model), cols = vars(task), scales = "free_x") +
+  theme_minimal(base_size = 12) +
+  labs(x = "", y = NULL) +
+  theme(
+    strip.placement.y = "left",                      # Move row labels to the left
+    strip.text.y.left = element_text(size = 10, face = "bold", angle = 0),  # Format row labels
+    strip.text = element_text(face = "bold", size = 13),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    legend.position = "none"
+  )
+dev.off()
+
+##### Plot results for F1-------
+df_long <- tab_sub %>%
+  pivot_longer(
+    cols = c(F1_mean, F1_sd
+             # AUC_mean, AUC_sd
+             # Precision_mean, Precision_sd
+             # Recall_mean, Recall_sd
+             # F1_mean, F1_sd
+    ),
+    names_to = c("Metric", "Type"),
+    names_sep = "_",
+    values_to = "Value"
+  ) %>%
+  pivot_wider(
+    names_from = Type,
+    values_from = Value
+  )
+
+df_long$LLM <- factor(df_long$LLM, levels = LLM_levels)
+df_long$LLM <- factor(df_long$LLM, levels = rev(levels(df_long$LLM)))
+
+df_ranked <- df_long %>%
+  group_by(model, task) %>%
+  mutate(rank = rank(-mean, ties.method = "average")) %>%
+  ungroup()
+
+# df_ranked <- df_ranked %>%
+#   mutate(model = recode(model,
+#                         "LR" = "Logistic regression",
+#                         "RF" = "Random forest"))
+
+pdf(paste0("./res/2025_0605_Plots/F1/Fig8_F1_", do_CV, "_", type, ".pdf"), width = 15, height = 3)
+ggplot(df_ranked, aes(x = mean, y = LLM)) +
+  geom_point(size = 2, color = "#E6AB02") +
+  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+                 height = 0.2, color = "#E6AB02") +
+  geom_text(aes(label = paste0(rank)),
+            hjust = -0.4, vjust = -0.4, color = "#E6AB02") +
+  facet_grid(rows = vars(model), cols = vars(task), scales = "free_x") +
+  theme_minimal(base_size = 12) +
+  labs(x = "", y = NULL) +
+  theme(
+    strip.placement.y = "left",                      # Move row labels to the left
+    strip.text.y.left = element_text(size = 10, face = "bold", angle = 0),  # Format row labels
+    strip.text = element_text(face = "bold", size = 13),
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    legend.position = "none"
+  )
+dev.off()
