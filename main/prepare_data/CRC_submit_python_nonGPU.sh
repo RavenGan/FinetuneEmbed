@@ -3,7 +3,7 @@
 #$ -m abe               # Send mail when job begins, ends and aborts
 #$ -q long              # Specify queue
 #$ -pe smp 1            # Specify number of cores to use.
-#$ -N Yufei     # Specify job name
+#$ -N Yufei_Names     # Specify job name
 
 module load conda
 source activate base
@@ -14,4 +14,5 @@ export PYTHONPATH="/afs/crc.nd.edu/group/StatDataMine/dm011/Dailin_Gan/FinetuneE
 # python prepare_15class_TrainEvalTest_text.py
 # python prepare_TrainEvalTest_Name.py
 # python GeneName_embed_MultiMod.py
-python GeneText_embed_MultiMod_Yufei.py
+# python Yufei_GeneTextHalved_embed_MultiMod.py
+python Yufei_GeneName_embed_MultiMod.py
