@@ -49,7 +49,7 @@ for i in range(len(model_names)):
                                     model_dim=model_dim[i])
     
     # Save
-    with open(f'./data/embeddings_Yufei/GeneTextHalved_{save_mod_names[i]}_embed.pickle', 'wb') as f:
+    with open(f'./data/embeddings_Yufei/GeneTextHalved/GeneTextHalved_{save_mod_names[i]}_embed.pickle', 'wb') as f:
         pickle.dump(embedding, f)
 
 
