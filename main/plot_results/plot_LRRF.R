@@ -11,6 +11,11 @@ renamed_tasks <- c("Task 1", "Task 2", "Task 3",
                    "Task 4", "Task 5")
 
 tab <- read.csv("./res/2025_0603_All_Num_Res/NoPCA_CV_name_embedding_NoTruncation_final.csv")
+tab$AUC_se <- tab$AUC_sd / sqrt(10)
+tab$Precision_se <- tab$Precision_sd / sqrt(10)
+tab$Recall_se <- tab$Recall_sd / sqrt(10)
+tab$F1_se <- tab$F1_sd / sqrt(10)
+
 
 fig_num <- "Fig5"
 
@@ -46,11 +51,11 @@ colors <- c("#1B9E77", # AUC
 ##### Plot results for AUC-------
 df_long <- tab_sub %>%
   pivot_longer(
-    cols = c(AUC_mean, AUC_sd
-             # AUC_mean, AUC_sd
-             # Precision_mean, Precision_sd
-             # Recall_mean, Recall_sd
-             # F1_mean, F1_sd
+    cols = c(AUC_mean, AUC_se
+             # AUC_mean, AUC_se
+             # Precision_mean, Precision_se
+             # Recall_mean, Recall_se
+             # F1_mean, F1_se
              ),
     names_to = c("Metric", "Type"),
     names_sep = "_",
@@ -74,10 +79,10 @@ df_ranked <- df_ranked %>%
                         "LR" = "Logistic regression",
                         "RF" = "Random forest"))
 
-pdf(paste0("./res/2025_0605_Plots/AUC/", fig_num, "_AUC.pdf"), width = 15, height = 7)
+pdf(paste0("./res/2025_0613_Plots/AUC/", fig_num, "_AUC.pdf"), width = 15, height = 7)
 ggplot(df_ranked, aes(x = mean, y = LLM)) +
   geom_point(size = 2, color = "#1B9E77") +
-  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+  geom_errorbarh(aes(xmin = mean - se, xmax = mean + se),
                  height = 0.2, color = "#1B9E77") +
   geom_text(aes(label = paste0(rank)),
             hjust = -0.4, vjust = -0.4, color = "#1B9E77") +
@@ -90,18 +95,19 @@ ggplot(df_ranked, aes(x = mean, y = LLM)) +
     strip.text = element_text(face = "bold", size = 13),
     axis.text.y = element_text(size = 12),
     axis.text.x = element_text(size = 12),
-    legend.position = "none"
+    legend.position = "none",
+    panel.spacing.x = unit(1.5, "lines")
   )
 dev.off()
 
 ##### Plot results for Precision-------
 df_long <- tab_sub %>%
   pivot_longer(
-    cols = c(Precision_mean, Precision_sd
-             # AUC_mean, AUC_sd
-             # Precision_mean, Precision_sd
-             # Recall_mean, Recall_sd
-             # F1_mean, F1_sd
+    cols = c(Precision_mean, Precision_se
+             # AUC_mean, AUC_se
+             # Precision_mean, Precision_se
+             # Recall_mean, Recall_se
+             # F1_mean, F1_se
     ),
     names_to = c("Metric", "Type"),
     names_sep = "_",
@@ -125,10 +131,10 @@ df_ranked <- df_ranked %>%
                         "LR" = "Logistic regression",
                         "RF" = "Random forest"))
 
-pdf(paste0("./res/2025_0605_Plots/Precision/", fig_num, "_Precision.pdf"), width = 15, height = 7)
+pdf(paste0("./res/2025_0613_Plots/Precision/", fig_num, "_Precision.pdf"), width = 15, height = 7)
 ggplot(df_ranked, aes(x = mean, y = LLM)) +
   geom_point(size = 2, color = "#D95F02") +
-  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+  geom_errorbarh(aes(xmin = mean - se, xmax = mean + se),
                  height = 0.2, color = "#D95F02") +
   geom_text(aes(label = paste0(rank)),
             hjust = -0.4, vjust = -0.4, color = "#D95F02") +
@@ -141,18 +147,19 @@ ggplot(df_ranked, aes(x = mean, y = LLM)) +
     strip.text = element_text(face = "bold", size = 13),
     axis.text.y = element_text(size = 12),
     axis.text.x = element_text(size = 12),
-    legend.position = "none"
+    legend.position = "none",
+    panel.spacing.x = unit(1.5, "lines")
   )
 dev.off()
 
 ##### Plot results for Recall-------
 df_long <- tab_sub %>%
   pivot_longer(
-    cols = c(Recall_mean, Recall_sd
-             # AUC_mean, AUC_sd
-             # Precision_mean, Precision_sd
-             # Recall_mean, Recall_sd
-             # F1_mean, F1_sd
+    cols = c(Recall_mean, Recall_se
+             # AUC_mean, AUC_se
+             # Precision_mean, Precision_se
+             # Recall_mean, Recall_se
+             # F1_mean, F1_se
     ),
     names_to = c("Metric", "Type"),
     names_sep = "_",
@@ -176,10 +183,10 @@ df_ranked <- df_ranked %>%
                         "LR" = "Logistic regression",
                         "RF" = "Random forest"))
 
-pdf(paste0("./res/2025_0605_Plots/Recall/", fig_num, "_Recall.pdf"), width = 15, height = 7)
+pdf(paste0("./res/2025_0613_Plots/Recall/", fig_num, "_Recall.pdf"), width = 15, height = 7)
 ggplot(df_ranked, aes(x = mean, y = LLM)) +
   geom_point(size = 2, color = "#7570B3") +
-  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+  geom_errorbarh(aes(xmin = mean - se, xmax = mean + se),
                  height = 0.2, color = "#7570B3") +
   geom_text(aes(label = paste0(rank)),
             hjust = -0.4, vjust = -0.4, color = "#7570B3") +
@@ -192,18 +199,19 @@ ggplot(df_ranked, aes(x = mean, y = LLM)) +
     strip.text = element_text(face = "bold", size = 13),
     axis.text.y = element_text(size = 12),
     axis.text.x = element_text(size = 12),
-    legend.position = "none"
+    legend.position = "none",
+    panel.spacing.x = unit(1.5, "lines")
   )
 dev.off()
 
 ##### Plot results for F1-------
 df_long <- tab_sub %>%
   pivot_longer(
-    cols = c(F1_mean, F1_sd
-             # AUC_mean, AUC_sd
-             # Precision_mean, Precision_sd
-             # Recall_mean, Recall_sd
-             # F1_mean, F1_sd
+    cols = c(F1_mean, F1_se
+             # AUC_mean, AUC_se
+             # Precision_mean, Precision_se
+             # Recall_mean, Recall_se
+             # F1_mean, F1_se
     ),
     names_to = c("Metric", "Type"),
     names_sep = "_",
@@ -227,10 +235,10 @@ df_ranked <- df_ranked %>%
                         "LR" = "Logistic regression",
                         "RF" = "Random forest"))
 
-pdf(paste0("./res/2025_0605_Plots/F1/", fig_num, "_F1.pdf"), width = 15, height = 7)
+pdf(paste0("./res/2025_0613_Plots/F1/", fig_num, "_F1.pdf"), width = 15, height = 7)
 ggplot(df_ranked, aes(x = mean, y = LLM)) +
   geom_point(size = 2, color = "#E6AB02") +
-  geom_errorbarh(aes(xmin = mean - sd, xmax = mean + sd),
+  geom_errorbarh(aes(xmin = mean - se, xmax = mean + se),
                  height = 0.2, color = "#E6AB02") +
   geom_text(aes(label = paste0(rank)),
             hjust = -0.4, vjust = -0.4, color = "#E6AB02") +
@@ -243,6 +251,7 @@ ggplot(df_ranked, aes(x = mean, y = LLM)) +
     strip.text = element_text(face = "bold", size = 13),
     axis.text.y = element_text(size = 12),
     axis.text.x = element_text(size = 12),
-    legend.position = "none"
+    legend.position = "none",
+    panel.spacing.x = unit(1.5, "lines")
   )
 dev.off()
