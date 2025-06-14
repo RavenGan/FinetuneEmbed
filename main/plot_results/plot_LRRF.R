@@ -10,14 +10,14 @@ tasks <- c("long_vs_shortTF", "DosageSensitivity", "MethylationState/bivalent_vs
 renamed_tasks <- c("Task 1", "Task 2", "Task 3",
                    "Task 4", "Task 5")
 
-tab <- read.csv("./res/2025_0603_All_Num_Res/NoPCA_CV_name_embedding_NoTruncation_final.csv")
+tab <- read.csv("./res/2025_0603_All_Num_Res/NoPCA_NoCV_text_embedding_NoTruncation_final.csv")
 tab$AUC_se <- tab$AUC_sd / sqrt(10)
 tab$Precision_se <- tab$Precision_sd / sqrt(10)
 tab$Recall_se <- tab$Recall_sd / sqrt(10)
 tab$F1_se <- tab$F1_sd / sqrt(10)
 
 
-fig_num <- "Fig5"
+fig_num <- "Fig1"
 
 for (i in 1:length(tasks)) {
   task_name <- tasks[i]
