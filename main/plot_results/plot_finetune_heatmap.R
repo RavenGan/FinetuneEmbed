@@ -70,39 +70,28 @@ df_ranked <- df_long %>%
 df_ranked <- df_ranked %>%
   mutate(label = sprintf("%.3f\n(±%.3f)", mean, se))
 
-pdf(paste0("./res/2025_0620_Plots/AUC/", fig_num, "_AUC.pdf"), width = 8, height = 5)
-ggplot(df_ranked, aes(x = task, y = LLM, fill = rank)) +
+df_ft <- df_ranked %>%
+  group_by(LLM) %>%
+  mutate(avg_auc = mean(mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(LLM = factor(LLM, levels = unique(LLM[order(avg_auc)])))
+
+p_ft <- ggplot(df_ft, aes(x = task, y = LLM, fill = rank)) +
   geom_tile(color = "white", width = 0.95, height = 0.95) +
-  geom_text(
-    aes(label = label),
-    size = 3.5,
-    family = "mono",
-    lineheight = 1.1,
-    hjust = 0.5, vjust = 0.5
-  ) +
-  scale_fill_gradient2(
-    low = "#FF6961", high = "#84B6F4", mid = "white",
-    midpoint = 5.5,
-    name = "Rank",
-    guide = guide_colorbar(barwidth = 1.2, barheight = 8)
-  ) +
-  # facet_grid(. ~ model) +
-  labs(
-    title = "",
-    x = NULL,
-    y = NULL
-  ) +
+  geom_text(aes(label = label), size = 3.5, family = "mono", hjust = 0.5) +
+  scale_fill_gradient2(low = "#FF6961", high = "#84B6F4", mid = "white", midpoint = 6,
+                       name = "Rank") +
+  scale_x_discrete(position = "top") + 
+  labs(title = NULL, x = NULL, y = NULL) +
   theme_minimal(base_size = 12) +
-  theme(
-    # plot.title = element_text(size = 14, face = "bold", hjust = 0.5, margin = margin(b = 10)),
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 13),
-    axis.text.y = element_text(size = 12),
-    panel.grid = element_blank(),
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10),
-    legend.position = "right"
-  )
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),  # centered, bold
+        strip.text = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank())
+
+pdf(paste0("./res/2025_0624_Plots/AUC/", fig_num, "_AUC.pdf"), width = 7, height = 5.5)
+print(p_ft)
 dev.off()
 
 ##### Plot results for Precision-------
@@ -134,39 +123,28 @@ df_ranked <- df_long %>%
 df_ranked <- df_ranked %>%
   mutate(label = sprintf("%.3f\n(±%.3f)", mean, se))
 
-pdf(paste0("./res/2025_0620_Plots/Precision/", fig_num, "_Precision.pdf"), width = 8, height = 5)
-ggplot(df_ranked, aes(x = task, y = LLM, fill = rank)) +
+df_ft <- df_ranked %>%
+  group_by(LLM) %>%
+  mutate(avg_auc = mean(mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(LLM = factor(LLM, levels = unique(LLM[order(avg_auc)])))
+
+p_ft <- ggplot(df_ft, aes(x = task, y = LLM, fill = rank)) +
   geom_tile(color = "white", width = 0.95, height = 0.95) +
-  geom_text(
-    aes(label = label),
-    size = 3.5,
-    family = "mono",
-    lineheight = 1.1,
-    hjust = 0.5, vjust = 0.5
-  ) +
-  scale_fill_gradient2(
-    low = "#FF6961", high = "#84B6F4", mid = "white",
-    midpoint = 5.5,
-    name = "Rank",
-    guide = guide_colorbar(barwidth = 1.2, barheight = 8)
-  ) +
-  # facet_grid(. ~ model) +
-  labs(
-    title = "",
-    x = NULL,
-    y = NULL
-  ) +
+  geom_text(aes(label = label), size = 3.5, family = "mono", hjust = 0.5) +
+  scale_fill_gradient2(low = "#FF6961", high = "#84B6F4", mid = "white", midpoint = 6,
+                       name = "Rank") +
+  scale_x_discrete(position = "top") + 
+  labs(title = NULL, x = NULL, y = NULL) +
   theme_minimal(base_size = 12) +
-  theme(
-    # plot.title = element_text(size = 14, face = "bold", hjust = 0.5, margin = margin(b = 10)),
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 13),
-    axis.text.y = element_text(size = 12),
-    panel.grid = element_blank(),
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10),
-    legend.position = "right"
-  )
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),  # centered, bold
+        strip.text = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank())
+
+pdf(paste0("./res/2025_0624_Plots/Precision/", fig_num, "_Precision.pdf"), width = 7, height = 5.5)
+print(p_ft)
 dev.off()
 
 ##### Plot results for Recall-------
@@ -198,40 +176,28 @@ df_ranked <- df_long %>%
 df_ranked <- df_ranked %>%
   mutate(label = sprintf("%.3f\n(±%.3f)", mean, se))
 
+df_ft <- df_ranked %>%
+  group_by(LLM) %>%
+  mutate(avg_auc = mean(mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(LLM = factor(LLM, levels = unique(LLM[order(avg_auc)])))
 
-pdf(paste0("./res/2025_0620_Plots/Recall/", fig_num, "_Recall.pdf"), width = 8, height = 5)
-ggplot(df_ranked, aes(x = task, y = LLM, fill = rank)) +
+p_ft <- ggplot(df_ft, aes(x = task, y = LLM, fill = rank)) +
   geom_tile(color = "white", width = 0.95, height = 0.95) +
-  geom_text(
-    aes(label = label),
-    size = 3.5,
-    family = "mono",
-    lineheight = 1.1,
-    hjust = 0.5, vjust = 0.5
-  ) +
-  scale_fill_gradient2(
-    low = "#FF6961", high = "#84B6F4", mid = "white",
-    midpoint = 5.5,
-    name = "Rank",
-    guide = guide_colorbar(barwidth = 1.2, barheight = 8)
-  ) +
-  # facet_grid(. ~ model) +
-  labs(
-    title = "",
-    x = NULL,
-    y = NULL
-  ) +
+  geom_text(aes(label = label), size = 3.5, family = "mono", hjust = 0.5) +
+  scale_fill_gradient2(low = "#FF6961", high = "#84B6F4", mid = "white", midpoint = 6,
+                       name = "Rank") +
+  scale_x_discrete(position = "top") + 
+  labs(title = NULL, x = NULL, y = NULL) +
   theme_minimal(base_size = 12) +
-  theme(
-    # plot.title = element_text(size = 14, face = "bold", hjust = 0.5, margin = margin(b = 10)),
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 13),
-    axis.text.y = element_text(size = 12),
-    panel.grid = element_blank(),
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10),
-    legend.position = "right"
-  )
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),  # centered, bold
+        strip.text = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank())
+
+pdf(paste0("./res/2025_0624_Plots/Recall/", fig_num, "_Recall.pdf"), width = 7, height = 5.5)
+print(p_ft)
 dev.off()
 
 ##### Plot results for F1-------
@@ -263,38 +229,26 @@ df_ranked <- df_long %>%
 df_ranked <- df_ranked %>%
   mutate(label = sprintf("%.3f\n(±%.3f)", mean, se))
 
+df_ft <- df_ranked %>%
+  group_by(LLM) %>%
+  mutate(avg_auc = mean(mean, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(LLM = factor(LLM, levels = unique(LLM[order(avg_auc)])))
 
-pdf(paste0("./res/2025_0620_Plots/F1/", fig_num, "_F1.pdf"), width = 8, height = 5)
-ggplot(df_ranked, aes(x = task, y = LLM, fill = rank)) +
+p_ft <- ggplot(df_ft, aes(x = task, y = LLM, fill = rank)) +
   geom_tile(color = "white", width = 0.95, height = 0.95) +
-  geom_text(
-    aes(label = label),
-    size = 3.5,
-    family = "mono",
-    lineheight = 1.1,
-    hjust = 0.5, vjust = 0.5
-  ) +
-  scale_fill_gradient2(
-    low = "#FF6961", high = "#84B6F4", mid = "white",
-    midpoint = 5.5,
-    name = "Rank",
-    guide = guide_colorbar(barwidth = 1.2, barheight = 8)
-  ) +
-  # facet_grid(. ~ model) +
-  labs(
-    title = "",
-    x = NULL,
-    y = NULL
-  ) +
+  geom_text(aes(label = label), size = 3.5, family = "mono", hjust = 0.5) +
+  scale_fill_gradient2(low = "#FF6961", high = "#84B6F4", mid = "white", midpoint = 6,
+                       name = "Rank") +
+  scale_x_discrete(position = "top") + 
+  labs(title = NULL, x = NULL, y = NULL) +
   theme_minimal(base_size = 12) +
-  theme(
-    # plot.title = element_text(size = 14, face = "bold", hjust = 0.5, margin = margin(b = 10)),
-    strip.text = element_text(size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 13),
-    axis.text.y = element_text(size = 12),
-    panel.grid = element_blank(),
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 10),
-    legend.position = "right"
-  )
+  theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 14),  # centered, bold
+        strip.text = element_text(size = 14, face = "bold"),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        panel.grid = element_blank())
+
+pdf(paste0("./res/2025_0624_Plots/F1/", fig_num, "_F1.pdf"), width = 7, height = 5.5)
+print(p_ft)
 dev.off()
